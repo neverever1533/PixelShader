@@ -22,11 +22,24 @@
 
 ![03](https://user-images.githubusercontent.com/52105884/159549138-4524a100-bb71-48a8-9ca5-8f83351d2706.PNG)
     
-4. 测试文件树自动展开
+4. 测试树
+  4.1 树文件展开
 
 ![04](https://user-images.githubusercontent.com/52105884/159549140-83afcb1d-e003-4b5c-a89e-b25b3758b92e.PNG)
 
+  4.2 测试树文件拖拽
+  
+![06](https://user-images.githubusercontent.com/52105884/161034999-3f2c05e2-db6e-4dbf-aaec-d60daa05dfb3.PNG)
 
+![07](https://user-images.githubusercontent.com/52105884/161035028-5fcdbb9b-6779-473b-aacc-6be7cbace801.PNG)
+
+![08](https://user-images.githubusercontent.com/52105884/161035088-64cd1f44-194e-4503-970c-0dbc1d0de4e4.PNG)
+
+  4.3 测试树文件删除
+
+![09](https://user-images.githubusercontent.com/52105884/161035221-6b487a1d-22e9-40b5-b048-dc3748a52032.PNG)
+
+  
 计划二：
     图形化界面优化>（进度80%）
 
