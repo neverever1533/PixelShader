@@ -1,6 +1,7 @@
 package cn.imaginary.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +38,7 @@ public class TestUI extends JFrame {
 	 * @author Sureness
 	 * @since 0.1
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 4247417000065494012L;
 
 	public static void main(String[] args) {
 		TestUI tui = new TestUI();
@@ -74,6 +75,7 @@ public class TestUI extends JFrame {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(480, 360);
 		setLocationRelativeTo(null);
+//		getContentPane().setBackground(Color.RED);
 //			getContentPane().setLayout(null);
 		{
 			JMenuBar jMenuBar = new JMenuBar();
@@ -102,7 +104,8 @@ public class TestUI extends JFrame {
 			jPanelDnD.setLayout(new BorderLayout());
 			{
 				JScrollPane jScrollPane = new JScrollPane();
-				int widthResources = 128;
+//				int widthResources = 128;
+				int widthResources = 464;
 				int heightResources = 360;
 				Dimension dimensionResources = new Dimension(widthResources, heightResources);
 				jScrollPane.setPreferredSize(dimensionResources);
