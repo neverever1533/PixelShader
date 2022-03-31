@@ -1,15 +1,18 @@
 package cn.imaginary.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import java.io.File;
+
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -25,7 +28,8 @@ import javax.swing.tree.TreePath;
 
 import javaev.io.FileUtils;
 
-import javaev.swing.JTreeDnD;
+import javaev.swing.JPanelDnD;
+import javaev.swing.JTreeUtils;
 
 public class TestUI extends JFrame {
 
@@ -44,7 +48,7 @@ public class TestUI extends JFrame {
 
 	private JFileChooser jFileChooser;
 
-	private JTreeDnD jTreeDnD;
+	private JTreeUtils jTreeUtils;
 
 	public TestUI() {
 		super();
@@ -61,7 +65,7 @@ public class TestUI extends JFrame {
 		if (object instanceof File) {
 			File file = (File) object;
 			if (file.isDirectory()) {
-				jTreeDnD.addNewUserObjects(treeNodeSelected, fileUtils.toList(file.listFiles()));
+				jTreeUtils.addNewUserObjects(treeNodeSelected, fileUtils.toList(file.listFiles()));
 			}
 		}
 	}
@@ -94,46 +98,147 @@ public class TestUI extends JFrame {
 			getContentPane().add(jMenuBar, BorderLayout.NORTH);
 		}
 		{
-			JScrollPane jScrollPane = new JScrollPane();
+			JPanelDnD jPanelDnD = new JPanelDnD();
+			jPanelDnD.setLayout(new BorderLayout());
 			{
-				DefaultMutableTreeNode dmTreeNodeRoot = new DefaultMutableTreeNode();
-				dmTreeNodeRoot.setUserObject("图层");
-				jTreeDnD = new JTreeDnD();
-				jTreeDnD.setShowsRootHandles(true);
-				jTreeDnD.setDragEnabled(true);
-				jTreeDnD.setEditable(true);
+				JScrollPane jScrollPane = new JScrollPane();
+				int widthResources = 128;
+				int heightResources = 360;
+				Dimension dimensionResources = new Dimension(widthResources, heightResources);
+				jScrollPane.setPreferredSize(dimensionResources);
+				{
+					DefaultMutableTreeNode dmTreeNodeRoot = new DefaultMutableTreeNode();
+					dmTreeNodeRoot.setUserObject("图层");
+					jTreeUtils = new JTreeUtils();
+					jTreeUtils.setShowsRootHandles(true);
+					jTreeUtils.setDragEnabled(true);
+					jTreeUtils.setEditable(true);
 //					jTreeDnD.setRootVisible(false);
-				DefaultTreeModel treeModelRoot = new DefaultTreeModel(dmTreeNodeRoot);
-				jTreeDnD.setModel(treeModelRoot);
-				MouseListener ml = new MouseAdapter() {
-					public void mousePressed(MouseEvent e) {
-						int selRow = jTreeDnD.getRowForLocation(e.getX(), e.getY());
-						TreePath selPath = jTreeDnD.getPathForLocation(e.getX(), e.getY());
-						if (selRow != -1) {
-							if (e.getClickCount() == 1) {
-								mySingleClick(selRow, selPath);
-							} else if (e.getClickCount() == 2) {
-								myDoubleClick(selRow, selPath);
+					DefaultTreeModel treeModelRoot = new DefaultTreeModel(dmTreeNodeRoot);
+					jTreeUtils.setModel(treeModelRoot);
+					MouseMotionListener mml = new MouseMotionListener() {
+
+						private TreePath draggedPath;
+						private TreePath movedPath;
+
+						@Override
+						public void mouseDragged(MouseEvent e) {
+//							int selRow = jTreeUtils.getRowForLocation(e.getX(), e.getY());
+							TreePath selPath = jTreeUtils.getPathForLocation(e.getX(), e.getY());
+							if (null != selPath) {
+								draggedPath = selPath;
 							}
 						}
-					}
-				};
-				jTreeDnD.addMouseListener(ml);
-				jScrollPane.getViewport().setView(jTreeDnD);
+
+						@Override
+						public void mouseMoved(MouseEvent e) {
+							int selRow = jTreeUtils.getRowForLocation(e.getX(), e.getY());
+							TreePath selPath = jTreeUtils.getPathForLocation(e.getX(), e.getY());
+							if (null != selPath) {
+								movedPath = selPath;
+								myNodeMoveTo(selRow, selPath);
+							}
+						}
+
+						private void myNodeMoveTo(int selRow, TreePath selPath) {
+							if (null != selPath) {
+								movedPath = selPath;
+								if (null != draggedPath) {
+									if (!movedPath.isDescendant(draggedPath) && draggedPath != movedPath) {
+										DefaultMutableTreeNode treeNodeSelected = (DefaultMutableTreeNode) draggedPath
+												.getLastPathComponent();
+										DefaultMutableTreeNode treeNodeMoved = (DefaultMutableTreeNode) movedPath
+												.getLastPathComponent();
+										if (null != treeNodeSelected && null != treeNodeMoved) {
+											DefaultMutableTreeNode parent;
+											if (treeNodeMoved.getAllowsChildren()) {
+												parent = treeNodeMoved;
+											} else {
+												parent = (DefaultMutableTreeNode) treeNodeMoved.getParent();
+											}
+											if (null != parent) {
+												DefaultTreeModel dtm = (DefaultTreeModel) jTreeUtils.getModel();
+												dtm.removeNodeFromParent(treeNodeSelected);
+												dtm.insertNodeInto(treeNodeSelected, parent, 0);
+												movedPath = null;
+											}
+										}
+									}
+								}
+							}
+						}
+					};
+					jTreeUtils.addMouseMotionListener(mml);
+					MouseListener ml = new MouseListener() {
+
+						@Override
+						public void mouseClicked(MouseEvent e) {
+							int selRow = jTreeUtils.getRowForLocation(e.getX(), e.getY());
+							TreePath selPath = jTreeUtils.getPathForLocation(e.getX(), e.getY());
+							if (null != selPath) {
+								if (selRow != -1) {
+									if (e.getButton() == MouseEvent.BUTTON3) {
+										myRightClick(selRow, selPath);
+									} else if (e.getClickCount() == 2) {
+										myDoubleClick(selRow, selPath);
+									}
+								}
+							}
+						}
+
+						@Override
+						public void mouseEntered(MouseEvent e) {
+							List<File> fileList = jPanelDnD.getDropResources();
+							if (null != fileList) {
+								jTreeUtils.addNewUserObjects((DefaultMutableTreeNode) jTreeUtils.getModel().getRoot(),
+										fileList);
+								jPanelDnD.setDropResources(null);
+							}
+						}
+
+						@Override
+						public void mouseExited(MouseEvent e) {
+						}
+
+						@Override
+						public void mousePressed(MouseEvent e) {
+						}
+
+						@Override
+						public void mouseReleased(MouseEvent e) {
+						}
+
+						private void myRightClick(int selRow, TreePath selPath) {
+							DefaultMutableTreeNode treeNodeSelected = (DefaultMutableTreeNode) selPath
+									.getLastPathComponent();
+							if (null == treeNodeSelected) {
+								return;
+							}
+							DefaultMutableTreeNode parent = (DefaultMutableTreeNode) treeNodeSelected.getParent();
+							if (null == parent) {
+								return;
+							}
+							DefaultTreeModel dtm = (DefaultTreeModel) jTreeUtils.getModel();
+							dtm.removeNodeFromParent(treeNodeSelected);
+						}
+
+					};
+					jTreeUtils.addMouseListener(ml);
+					jScrollPane.getViewport().setView(jTreeUtils);
+				}
+				jPanelDnD.add(jScrollPane);
 			}
-			getContentPane().add(jScrollPane);
+			getContentPane().add(jPanelDnD, BorderLayout.WEST);
 		}
 	}
 
-	private void myDoubleClick(int selRow, TreePath selPath) {
-		System.out.println(selRow);
-		System.out.println(selPath);
-		expandDirectory(selRow, selPath);
+	private void loadResources(File[] fileArray) {
+		jTreeUtils.addNewUserObjects((DefaultMutableTreeNode) ((DefaultTreeModel) jTreeUtils.getModel()).getRoot(),
+				fileUtils.toList(fileArray));
 	}
 
-	private void mySingleClick(int selRow, TreePath selPath) {
-		System.out.println(selRow);
-		System.out.println(selPath);
+	private void myDoubleClick(int selRow, TreePath selPath) {
+		expandDirectory(selRow, selPath);
 	}
 
 	private File[] openFiles() {
@@ -150,11 +255,6 @@ public class TestUI extends JFrame {
 		}
 		File[] fileArray = jFileChooser.getSelectedFiles();
 		return fileArray;
-	}
-
-	private void loadResources(File[] fileArray) {
-		jTreeDnD.addNewUserObjects((DefaultMutableTreeNode) ((DefaultTreeModel) jTreeDnD.getModel()).getRoot(),
-				fileUtils.toList(fileArray));
 	}
 
 }
