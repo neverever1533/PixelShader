@@ -10,7 +10,8 @@
 ![00](https://user-images.githubusercontent.com/52105884/159549114-12750b14-ee30-4e7b-bc71-1590ece97b03.PNG)
     
 2. 测试文件浏览
-  2.1浏览文件，单选、多选、文件夹、文件
+
+  2.1 浏览文件，单选、多选、文件夹、文件
 
 ![01](https://user-images.githubusercontent.com/52105884/159549120-72453c7a-7f84-4e9c-9bf7-f3cc7bc14699.PNG)
     
