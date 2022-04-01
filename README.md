@@ -35,6 +35,8 @@
 ![06](https://user-images.githubusercontent.com/52105884/161034999-3f2c05e2-db6e-4dbf-aaec-d60daa05dfb3.PNG)
 ![07](https://user-images.githubusercontent.com/52105884/161035028-5fcdbb9b-6779-473b-aacc-6be7cbace801.PNG)
 ![08](https://user-images.githubusercontent.com/52105884/161035088-64cd1f44-194e-4503-970c-0dbc1d0de4e4.PNG)
+![11](https://user-images.githubusercontent.com/52105884/161241457-cdca7213-b077-4fa3-937b-542010571132.PNG)
+![12](https://user-images.githubusercontent.com/52105884/161241490-d84146a0-7483-4d61-ad6f-ddc231566d04.PNG)
 
   4.3 测试树节点删除（快捷：鼠标右键单击）
 
