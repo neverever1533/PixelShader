@@ -19,12 +19,12 @@ import javax.swing.JPanel;
 
 public class JPanelDnD extends JPanel implements DropTargetListener {
 
-	private List<File> fileList;
-
 	/**
 	 * @author Sureness
 	 */
 	private static final long serialVersionUID = 3515265123617885169L;
+
+	private List<File> fileList;
 
 	public JPanelDnD() {
 		new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, this);
@@ -35,35 +35,35 @@ public class JPanelDnD extends JPanel implements DropTargetListener {
 	}
 
 	@Override
-	public void dragOver(DropTargetDragEvent dtde) {
-	}
-
-	@Override
-	public void dropActionChanged(DropTargetDragEvent dtde) {
-	}
-
-	@Override
 	public void dragExit(DropTargetEvent dte) {
+	}
+
+	@Override
+	public void dragOver(DropTargetDragEvent dtde) {
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void drop(DropTargetDropEvent dtde) {
 		DataFlavor dataFlavor = DataFlavor.javaFileListFlavor;
+//		System.out.println(dataFlavor);
 		if (dtde.isDataFlavorSupported(dataFlavor)) {
 			dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-			List<File> list = null;
 			Transferable transferable = dtde.getTransferable();
 			try {
-				list = (List<File>) transferable.getTransferData(dataFlavor);
+				fileList = (List<File>) transferable.getTransferData(dataFlavor);
 			} catch (UnsupportedFlavorException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			setDropResources(list);
+			setDropResources(fileList);
 			dtde.dropComplete(true);
 		}
+	}
+
+	@Override
+	public void dropActionChanged(DropTargetDragEvent dtde) {
 	}
 
 	public List<File> getDropResources() {
