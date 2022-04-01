@@ -1,7 +1,6 @@
 package cn.imaginary.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +24,6 @@ import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 
 import javaev.io.FileUtils;
 
@@ -57,8 +55,11 @@ public class TestUI extends JFrame {
 		initGUI();
 	}
 
-	private void expandDirectory(int selRow, TreePath selPath) {
-		DefaultMutableTreeNode treeNodeSelected = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+	private void expandDirectory(int selRow) {
+		expandTreeNodeDirectory((DefaultMutableTreeNode) jTreeUtils.getPathForRow(selRow).getLastPathComponent());
+	}
+
+	private void expandTreeNodeDirectory(DefaultMutableTreeNode treeNodeSelected) {
 		if (null == treeNodeSelected) {
 			return;
 		}
@@ -116,59 +117,37 @@ public class TestUI extends JFrame {
 					jTreeUtils.setShowsRootHandles(true);
 					jTreeUtils.setDragEnabled(true);
 					jTreeUtils.setEditable(true);
-//					jTreeDnD.setRootVisible(false);
+//					jTreeUtils.setRootVisible(false);
 					DefaultTreeModel treeModelRoot = new DefaultTreeModel(dmTreeNodeRoot);
 					jTreeUtils.setModel(treeModelRoot);
 					MouseMotionListener mml = new MouseMotionListener() {
 
-						private TreePath draggedPath;
-						private TreePath movedPath;
+						private int rowDragged;
+						private int rowMoved;
 
 						@Override
 						public void mouseDragged(MouseEvent e) {
-//							int selRow = jTreeUtils.getRowForLocation(e.getX(), e.getY());
-							TreePath selPath = jTreeUtils.getPathForLocation(e.getX(), e.getY());
-							if (null != selPath) {
-								draggedPath = selPath;
-							}
+							int selRow = jTreeUtils.getRowForLocation(e.getX(), e.getY());
+							rowDragged = selRow;
 						}
 
 						@Override
 						public void mouseMoved(MouseEvent e) {
 							int selRow = jTreeUtils.getRowForLocation(e.getX(), e.getY());
-							TreePath selPath = jTreeUtils.getPathForLocation(e.getX(), e.getY());
-							if (null != selPath) {
-								movedPath = selPath;
-								myNodeMoveTo(selRow, selPath);
-							}
+							myTreeNodeMoveTo(selRow);
 						}
 
-						private void myNodeMoveTo(int selRow, TreePath selPath) {
-							if (null != selPath) {
-								movedPath = selPath;
-								if (null != draggedPath) {
-									if (!movedPath.isDescendant(draggedPath) && draggedPath != movedPath) {
-										DefaultMutableTreeNode treeNodeSelected = (DefaultMutableTreeNode) draggedPath
-												.getLastPathComponent();
-										DefaultMutableTreeNode treeNodeMoved = (DefaultMutableTreeNode) movedPath
-												.getLastPathComponent();
-										if (null != treeNodeSelected && null != treeNodeMoved) {
-											DefaultMutableTreeNode parent;
-											if (treeNodeMoved.getAllowsChildren()) {
-												parent = treeNodeMoved;
-											} else {
-												parent = (DefaultMutableTreeNode) treeNodeMoved.getParent();
-											}
-											if (null != parent) {
-												DefaultTreeModel dtm = (DefaultTreeModel) jTreeUtils.getModel();
-												dtm.removeNodeFromParent(treeNodeSelected);
-												dtm.insertNodeInto(treeNodeSelected, parent, 0);
-												movedPath = null;
-											}
-										}
-									}
-								}
+						private void myTreeNodeMoveTo(int selRow) {
+							rowMoved = selRow;
+							if (rowMoved == -1 || rowDragged == -1 || rowDragged == 0 || rowMoved == rowDragged) {
+								return;
 							}
+							DefaultMutableTreeNode treeNodeDragged = (DefaultMutableTreeNode) jTreeUtils
+									.getPathForRow(rowDragged).getLastPathComponent();
+							DefaultMutableTreeNode treeNodeMoved = (DefaultMutableTreeNode) jTreeUtils
+									.getPathForRow(rowMoved).getLastPathComponent();
+							jTreeUtils.treeNodeMoveTo(treeNodeDragged, treeNodeMoved);
+							rowDragged = -1;
 						}
 					};
 					jTreeUtils.addMouseMotionListener(mml);
@@ -177,26 +156,23 @@ public class TestUI extends JFrame {
 						@Override
 						public void mouseClicked(MouseEvent e) {
 							int selRow = jTreeUtils.getRowForLocation(e.getX(), e.getY());
-							TreePath selPath = jTreeUtils.getPathForLocation(e.getX(), e.getY());
-							if (null != selPath) {
-								if (selRow != -1) {
+							if (selRow != -1) {
+								if (e.getClickCount() == 1) {
 									if (e.getButton() == MouseEvent.BUTTON3) {
-										myRightClick(selRow, selPath);
-									} else if (e.getClickCount() == 2) {
-										myDoubleClick(selRow, selPath);
+										myRightClick(selRow);
+									} else {
+										mySingleClick(selRow);
 									}
+								} else if (e.getClickCount() == 2) {
+									myDoubleClick(selRow);
 								}
 							}
 						}
 
 						@Override
 						public void mouseEntered(MouseEvent e) {
-							List<File> fileList = jPanelDnD.getDropResources();
-							if (null != fileList) {
-								jTreeUtils.addNewUserObjects((DefaultMutableTreeNode) jTreeUtils.getModel().getRoot(),
-										fileList);
-								jPanelDnD.setDropResources(null);
-							}
+							loadResources(jPanelDnD.getDropResources());
+							jPanelDnD.setDropResources(null);
 						}
 
 						@Override
@@ -211,9 +187,12 @@ public class TestUI extends JFrame {
 						public void mouseReleased(MouseEvent e) {
 						}
 
-						private void myRightClick(int selRow, TreePath selPath) {
-							DefaultMutableTreeNode treeNodeSelected = (DefaultMutableTreeNode) selPath
-									.getLastPathComponent();
+						private void myRightClick(int selRow) {
+							if (selRow == -1) {
+								return;
+							}
+							DefaultMutableTreeNode treeNodeSelected = (DefaultMutableTreeNode) jTreeUtils
+									.getPathForRow(selRow).getLastPathComponent();
 							if (null == treeNodeSelected) {
 								return;
 							}
@@ -223,6 +202,12 @@ public class TestUI extends JFrame {
 							}
 							DefaultTreeModel dtm = (DefaultTreeModel) jTreeUtils.getModel();
 							dtm.removeNodeFromParent(treeNodeSelected);
+						}
+
+						private void mySingleClick(int selRow) {
+							if (selRow == -1) {
+								return;
+							}
 						}
 
 					};
@@ -240,8 +225,14 @@ public class TestUI extends JFrame {
 				fileUtils.toList(fileArray));
 	}
 
-	private void myDoubleClick(int selRow, TreePath selPath) {
-		expandDirectory(selRow, selPath);
+	private void loadResources(List<File> fileList) {
+		if (null != fileList) {
+			jTreeUtils.addNewUserObjects((DefaultMutableTreeNode) jTreeUtils.getModel().getRoot(), fileList);
+		}
+	}
+
+	private void myDoubleClick(int selRow) {
+		expandDirectory(selRow);
 	}
 
 	private File[] openFiles() {
