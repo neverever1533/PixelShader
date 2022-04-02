@@ -1,7 +1,9 @@
 package cn.imaginary.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -9,9 +11,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 
 import java.io.File;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -19,11 +27,17 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+
+import javaev.awt.Graphics2DUtils;
+
+import javaev.imageio.ImageIOUtils;
 
 import javaev.io.FileUtils;
 
@@ -44,6 +58,10 @@ public class TestUI extends JFrame {
 	}
 
 	private FileUtils fileUtils = FileUtils.getInstance();
+
+	private Graphics2DUtils g2dUtils = new Graphics2DUtils();
+
+	private ImageIOUtils imageIOUtils = new ImageIOUtils();
 
 	private JFileChooser jFileChooser;
 
@@ -72,6 +90,24 @@ public class TestUI extends JFrame {
 		}
 	}
 
+	public BufferedImage getBufferedImage(BufferedImage[] imageArray) {
+		if (null == imageArray) {
+			return null;
+		}
+		Rectangle rectangle = g2dUtils.getRectangleMax(imageArray);
+		BufferedImage image = g2dUtils.drawImage(imageArray, 0, 0, rectangle.width, rectangle.height);
+		return image;
+	}
+
+	public BufferedImage getBufferedImage(File[] fileArray) {
+		BufferedImage[] imageArray = imageIOUtils.read(fileArray);
+		return getBufferedImage(imageArray);
+	}
+
+	public void imageExport(File file, BufferedImage image) {
+		imageIOUtils.write(file, image);
+	}
+
 	private void initGUI() {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(480, 360);
@@ -84,17 +120,30 @@ public class TestUI extends JFrame {
 				JMenu jMenu = new JMenu();
 				jMenu.setText("文件");
 				{
-					JMenuItem jMenuItem = new JMenuItem();
-					jMenuItem.setText("打开");
-					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
-					jMenuItem.addActionListener(new ActionListener() {
+					JMenuItem jMenuItemOpen = new JMenuItem();
+					jMenuItemOpen.setText("打开");
+					jMenuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+					jMenuItemOpen.addActionListener(new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
 							loadResources(openFiles());
 						}
 					});
-					jMenu.add(jMenuItem);
+					jMenu.add(jMenuItemOpen);
+				}
+				{
+					JMenuItem jMenuItemExport = new JMenuItem();
+					jMenuItemExport.setText("合并导出");
+					jMenuItemExport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
+					jMenuItemExport.addActionListener(new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							storeResources(openFiles());
+						}
+					});
+					jMenu.add(jMenuItemExport);
 				}
 				jMenuBar.add(jMenu);
 			}
@@ -218,6 +267,11 @@ public class TestUI extends JFrame {
 			}
 			getContentPane().add(jPanelDnD, BorderLayout.WEST);
 		}
+		{
+			JPanel jPanelGraphics = new JPanel();
+			jPanelGraphics.setBackground(Color.black);
+			getContentPane().add(jPanelGraphics, BorderLayout.CENTER);
+		}
 	}
 
 	private void loadResources(File[] fileArray) {
@@ -249,6 +303,54 @@ public class TestUI extends JFrame {
 		}
 		File[] fileArray = jFileChooser.getSelectedFiles();
 		return fileArray;
+	}
+
+	private void storeResources(File[] fileArray) {
+		File file = fileArray[0];
+		File dir;
+		if (!file.isDirectory()) {
+			dir = file.getParentFile();
+			if (null != dir) {
+				dir = new File(dir, "Export");
+			}
+		} else {
+			dir = file;
+		}
+		if (null == dir) {
+			return;
+		}
+		DefaultTreeModel treeModel = (DefaultTreeModel) jTreeUtils.getModel();
+		DefaultMutableTreeNode treeNodeRoot = (DefaultMutableTreeNode) treeModel.getRoot();
+		DefaultMutableTreeNode treeNode;
+		Object object;
+		File fileNode;
+		ArrayList<File> list = new ArrayList<>();
+		Enumeration<TreeNode> treeNodeEnumeration = treeNodeRoot.preorderEnumeration();
+		for (Iterator<TreeNode> iterator = treeNodeEnumeration.asIterator(); iterator.hasNext();) {
+			treeNode = (DefaultMutableTreeNode) iterator.next();
+			object = treeNode.getUserObject();
+			if (null != object && object instanceof File) {
+				fileNode = (File) object;
+				if (fileNode.isFile()) {
+					list.add(fileNode);
+				}
+			}
+		}
+		int len = list.size();
+		File[] fileArr = new File[len];
+		list.toArray(fileArr);
+		Calendar calendar = new GregorianCalendar();
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("layerCombined-");
+		sbuf.append(calendar.get(Calendar.DAY_OF_MONTH));
+		sbuf.append(calendar.get(Calendar.HOUR_OF_DAY));
+		sbuf.append(calendar.get(Calendar.MINUTE));
+		sbuf.append(calendar.get(Calendar.SECOND));
+		sbuf.append(calendar.get(Calendar.MILLISECOND));
+		sbuf.append(".png");
+		String fileName = sbuf.toString();
+		File temp = new File(dir, fileName);
+		imageIOUtils.write(temp, getBufferedImage(fileArr));
 	}
 
 }
