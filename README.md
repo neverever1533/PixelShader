@@ -4,11 +4,11 @@
 ---------分割线---------
 
 说明：
-本项目由 eclipse java-2022-03 版本创建，自带默认使用Java版本为 JavaSE-17 ，若当前电脑并未预装此Java环境，则可以下载安装以上Java版本，或完整的JRE文件夹存放到项目文件夹，双击自建的 run.bat 文件代替 TestUI.jar 来运行！
+本项目由 eclipse java-2022-03 版本创建，自带默认使用Java版本为 JavaSE-17 ，若当前电脑并未预装此Java环境，则可以下载安装以上Java版本，或完整的JRE文件夹存放到项目文件夹，双击自建的 TestUI.bat 文件代替 TestUI.jar 来运行！
 
 ![16](https://user-images.githubusercontent.com/52105884/161394196-2ebbc378-25d1-4b66-bea0-5abcd72db12a.PNG)
 
-run.bat 内容：
+TestUI.bat 内容：
 start jre\bin\javaw -jar TestUI.jar
 
 ---------分割线---------
