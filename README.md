@@ -4,7 +4,10 @@
 ---------分割线---------
 
 说明：
-    本项目由 eclipse java-2022-03 版本创建，项目分别导出 OpenJDK JavaSE-17 和 JavaSE-1.8 两个运行环境的 jar 文件，若两个版本 jar 均运行出错或并未安装 Java 环境，请使用以下方法以体验本项目相关小工具：
+
+  本项目由 eclipse java-2022-03 版本创建，安装有 eclipse 类软件的可使用项目源码打包使用，不会打包项目的请下载 ① TestUI_xx.jar (for_JavaSE-1.8.jar 或 for_OpenJDK_JavaSE-17.0.2.jar 根据自己电脑当期 Java 环境选择）；下载 ② lib 文件夹（其内 toolkit.jar 为项目依赖包必须下载）；
+    
+  项目分别导出 OpenJDK JavaSE-17 和 JavaSE-1.8 两个运行环境的 jar 文件，若两个版本 jar 均运行出错（其中 ）或并未安装 Java 环境，请使用以下方法获得 Java 环境支持以体验本项目相关小工具：
 
 1. 安装对应版本 Java 安装包（未安装Java环境的用户）：
 
