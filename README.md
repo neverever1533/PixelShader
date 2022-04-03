@@ -34,7 +34,7 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
 
 另存为或重命名 txt 文件为 TestUI_for_JavaSE-1.8_run.bat，然后鼠标双击此 bat 文件就能运行 jar 项目文件；
 
-![16](https://user-images.githubusercontent.com/52105884/161420245-c6d7ce51-3a48-4d6d-b031-98d155a175dd.PNG)
+![16](https://user-images.githubusercontent.com/52105884/161420388-a620bbf2-6efc-4970-abde-5d1d5e230236.PNG)
 
 ---------分割线---------
 
