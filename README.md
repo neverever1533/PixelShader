@@ -4,12 +4,37 @@
 ---------分割线---------
 
 说明：
-本项目由 eclipse java-2022-03 版本创建，自带默认使用Java版本为 OpenJDK JavaSE-17 ，若当前电脑并未预装此Java环境，则可以下载安装以上Java版本，或完整的JRE文件夹存放到项目文件夹，双击自建的 TestUI.bat 文件代替 TestUI.jar 来运行！
+    本项目由 eclipse java-2022-03 版本创建，项目分别导出 OpenJDK JavaSE-17 和 JavaSE-1.8 两个运行环境的 jar 文件，若两个版本 jar 均运行出错或并未安装 Java 环境，请使用以下方法以体验本项目相关小工具：
 
-![16](https://user-images.githubusercontent.com/52105884/161394196-2ebbc378-25d1-4b66-bea0-5abcd72db12a.PNG)
+1. 安装对应版本 Java 安装包（未安装Java环境的用户）：
 
-TestUI.bat 内容：
-start jre\bin\javaw -jar TestUI.jar
+ 1.1 我的电脑右键【属性】 > 【高级系统设置】 > 【环境变量】 > 【系统变量】 > 【新建】 > 【变量名】
+ 
+ JAVA_HOME
+ 
+【浏览目录】
+
+例：【变量值】
+
+D:\Application\Java\jdk1.8.0_201
+
+![17](https://user-images.githubusercontent.com/52105884/161420296-5c066787-c309-4ed8-a723-9ef3d3da3284.PNG)
+
+ 1.2 【系统变量】 > 【path】 > 【编辑】 > 【新建】
+
+%JAVA_HOME%\bin
+
+![18](https://user-images.githubusercontent.com/52105884/161420310-5da77ec6-9f9d-47c2-ace7-e629233562b4.PNG)
+
+2. 放置对应 Java 版本的完整的 JRE 文件夹（不想安装java或当期版本不适用可用此方法）：
+
+JRE 目录存放到项目 jar 所在的文件夹，新建文本文档并编辑，输入以下内容：
+
+start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
+
+另存为或重命名 txt 文件为 TestUI_for_JavaSE-1.8_run.bat，然后鼠标双击此 bat 文件就能运行 jar 项目文件；
+
+![16](https://user-images.githubusercontent.com/52105884/161420245-c6d7ce51-3a48-4d6d-b031-98d155a175dd.PNG)
 
 ---------分割线---------
 
