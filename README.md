@@ -57,6 +57,20 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
  
  图层变形功能实装>（进度35%）
  
+ 工具栏功能（进度60%）
+
+  1.1 图层修改（进度80%）
+
+   1.1.1 TextField修改坐标、尺寸（宽高/缩放）、变换、锚点、显示实时修改（进度100%）
+ 
+   1.1.2 鼠标修改坐标、旋转、修改锚点（进度0%）
+
+  2.2 图片编辑（进度0%）
+ 
+![cup](https://user-images.githubusercontent.com/52105884/162568214-db6f3c9c-c8b8-4956-8f59-65f54a5bb67c.PNG)
+
+![test](https://user-images.githubusercontent.com/52105884/162568223-bdf1b5f6-49ca-468a-b758-8b14ab196a1b.png)
+ 
 ......待编辑......
 
 ---------分割线---------
@@ -80,20 +94,6 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
    1.2.2 变形（进度35%）
 
 ![05](https://user-images.githubusercontent.com/52105884/159551456-e9c63e3e-303d-4a63-a635-f522ab3e0fb3.PNG)
-
- 2. 工具栏功能（进度60%）
-
-  2.1 图层修改（进度80%）
-
-   2.1.1 TextField修改坐标、尺寸（宽高/缩放）、变换、锚点、显示实时修改（进度100%）
- 
-   2.1.2 鼠标修改坐标、旋转、修改锚点（进度0%）
-
-  2.2 图片编辑（进度0%）
-
-![cup](https://user-images.githubusercontent.com/52105884/162568214-db6f3c9c-c8b8-4956-8f59-65f54a5bb67c.PNG)
-
-![test](https://user-images.githubusercontent.com/52105884/162568223-bdf1b5f6-49ca-468a-b758-8b14ab196a1b.png)
 
 ---------分割线---------
 
