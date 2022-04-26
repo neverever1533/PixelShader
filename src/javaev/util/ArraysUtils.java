@@ -1,10 +1,47 @@
 package javaev.util;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
-import javaev.lang.StringUtils;
+import javaev.lang.ObjectUtils;
 
 public class ArraysUtils {
+	public static boolean contains(Object[] array, Object object) {
+		if (null != array) {
+			List<Object> list = Arrays.asList(array);
+			Object obj;
+			for (Iterator<Object> iterator = list.iterator(); iterator.hasNext();) {
+				obj = iterator.next();
+				if (ObjectUtils.equals(obj, object)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public static int indexOf(Object[] array, Object object) {
+		if (null != array) {
+			Object obj;
+			for (int i = 0, iLength = array.length; i < iLength; i++) {
+				obj = array[i];
+				if (ObjectUtils.equals(obj, object)) {
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+
+	public static int search(Object[] array, Object object) {
+		if (null != array) {
+			List<Object> list = Arrays.asList(array);
+			return list.indexOf(object);
+		}
+		return -1;
+	}
+
 	public static int[] toArray(int[][] from, int[] to) {
 		if (null != from && null != to) {
 			int index = 0;
@@ -59,27 +96,120 @@ public class ArraysUtils {
 		return null;
 	}
 
-	public static String toString(Object object) {
-		if (object instanceof Object[]) {
-			return toString((Object[]) object);
-		} else if (object instanceof Object[][]) {
-			return toString((Object[][]) object);
-		} else {
-			return object.toString();
-		}
-	}
-
-	private static String toString(Object[] array) {
-		return Arrays.toString(array);
-	}
-
-	private static String toString(Object[][] arrays) {
+	public static String toString(boolean[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
 		for (int i = 0; i < arrays.length; i++) {
-			sbuf.append(toString(arrays[i]));
-			sbuf.append(StringUtils.Line_Separator);
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
 		}
+		sbuf.append("]");
 		return sbuf.toString();
 	}
 
+	public static String toString(byte[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
+
+	public static String toString(char[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
+
+	public static String toString(double[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
+
+	public static String toString(float[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
+
+	public static String toString(int[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
+
+	public static String toString(long[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
+
+	public static String toString(Object[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
+
+	public static String toString(short[][] arrays) {
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for (int i = 0; i < arrays.length; i++) {
+			if (i != 0) {
+				sbuf.append(", ");
+			}
+			sbuf.append(Arrays.toString(arrays[i]));
+		}
+		sbuf.append("]");
+		return sbuf.toString();
+	}
 }
