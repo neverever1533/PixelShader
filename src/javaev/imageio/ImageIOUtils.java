@@ -5,83 +5,56 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.Iterator;
+import java.util.List;
+
 import javax.imageio.ImageIO;
 
-import javaev.io.FileNameMapUtils;
 import javaev.io.FileUtils;
-
 import javaev.util.ArraysUtils;
 
 public class ImageIOUtils {
-
-	private FileNameMapUtils fileNameMapUtils = new FileNameMapUtils();
+	public static String FileSuffixes_Default = ".png";
+	public static String FormatName_Default = "png";
 
 	private FileUtils fileUtils = FileUtils.getInstance();
 
 	public BufferedImage read(File file) {
-		if (file.isAbsolute()) {
-			if (fileNameMapUtils.isFileImage(file)) {
-				BufferedImage image = null;
-				try {
-					image = ImageIO.read(file);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return image;
+		if (null != file) {
+			try {
+				return ImageIO.read(file);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 		return null;
 	}
 
-	public BufferedImage[] read(File[] fileArray) {
-		if (null != fileArray) {
-			int len = fileArray.length;
-			if(len != 0) {
-				BufferedImage[] temp = new BufferedImage[len];
-				for (int i = 0, ilength = len; i < ilength; i++) {
-					temp[i] = read(fileArray[i]);
-				}
-				return temp;
-			}
-		}
-		return null;
-	}
-
-	public BufferedImage write(File file, BufferedImage image) {
-		if (file.isAbsolute() && null != image) {
-			if (fileNameMapUtils.isFileImage(file)) {
-				String suffix = fileUtils.getFileNameSuffix(file);
-				if (null != suffix) {
-					String formatName = suffix.substring(1);
-					try {
-						ImageIO.write(image, formatName, file);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		return image;
-	}
-
-	public void write(File file, BufferedImage[] bufferedImageArray) {
-		if (null != bufferedImageArray && file.isAbsolute()) {
-			File dir;
-			if (!file.isDirectory()) {
-				dir = file.getParentFile();
-				if (null != dir) {
-					dir = new File(dir, "Export");
-				}
-			} else {
-				dir = file;
-			}
-			if (null == dir) {
-				return;
-			}
-			for (int i = 0, ilength = bufferedImageArray.length; i < ilength; i++) {
-				write(new File(dir, ArraysUtils.toString(i)), bufferedImageArray[i]);
+	public void read(List<File> fileList, List<BufferedImage> imageList) {
+		if (null != fileList && null != imageList) {
+			for (Iterator<File> iterator = fileList.iterator(); iterator.hasNext();) {
+				imageList.add(read(iterator.next()));
 			}
 		}
 	}
 
+	public void write(BufferedImage image, String formatName, File file) {
+		if (null != image && null != file) {
+			if (null == formatName || !ArraysUtils.contains(ImageIO.getWriterFormatNames(), formatName)) {
+				formatName = FormatName_Default;
+			}
+			try {
+				if (file.isDirectory()) {
+					file = fileUtils.getFile(file, FileSuffixes_Default);
+				}
+				File dir = file.getParentFile();
+				if(!dir.exists()) {
+					dir.mkdir();
+				}
+				ImageIO.write(image, formatName, file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
