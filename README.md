@@ -5,9 +5,9 @@
 
 说明：
 
-  本项目由 eclipse java-2022-03 版本创建，安装有 eclipse 类软件的可使用项目源码打包使用，不会打包项目的请下载 ① TestUI_xx.jar (for_JavaSE-1.8.jar 或 for_OpenJDK_JavaSE-17.0.2.jar 根据自己电脑当期 Java 环境选择）；下载 ② lib 文件夹（其内 toolkit.jar 为项目依赖包必须下载）；
+  本项目由 eclipse java-2022-03 版本创建，安装有 eclipse 类软件的可使用项目源码打包使用，不会打包项目的请下载 ① PixelShaderUI_for_JavaSE-1.8_v.40.3.jar；下载 ② lib 文件夹（其内 cn.imaginary.toolkit.v3.6.jar 和psd-library-001.jar 为项目依赖包必须下载）；
     
-  项目分别导出 OpenJDK JavaSE-17 和 JavaSE-1.8 两个运行环境的 jar 文件，若两个版本 jar 均运行出错（其中 ）或并未安装 Java 环境，请使用以下方法获得 Java 环境支持以体验本项目相关小工具：
+  并未安装 Java 环境或运行出错，请使用以下方法获得 Java 环境支持以体验本项目相关小工具：
 
 1. 安装对应版本 Java 安装包（未安装Java环境的用户）：
 
@@ -47,8 +47,16 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
 
  联动继承（进度0%）
  
- 图帧编辑（进度0%）
+ 图帧编辑（进度60%）
  
+![20](https://user-images.githubusercontent.com/52105884/165331163-fb80a4d5-7de4-44de-9e16-13a465eee20c.PNG)
+
+![21](https://user-images.githubusercontent.com/52105884/165331275-d9c8ff3b-0039-4e7c-b2dc-d6b11ae60679.PNG)
+
+![22](https://user-images.githubusercontent.com/52105884/165331320-cab9e434-e2b6-41e1-ae89-8f30de7e1eb0.PNG)
+
+![23](https://user-images.githubusercontent.com/52105884/165331426-b75559de-d0e8-40ba-b19c-f3aeea26033c.PNG)
+
  ---------分割线---------
 
 计划三：
@@ -57,15 +65,15 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
  
  图层变形功能实装>（进度35%）
  
- 工具栏功能（进度60%）
+ 工具栏功能（进度75%）
 
-  1.1 图层修改（进度80%）
+  1.1 图层修改（进度85%）
 
    1.1.1 TextField修改坐标、尺寸（宽高/缩放）、变换、锚点、显示实时修改（进度100%）
  
-   1.1.2 鼠标修改坐标、旋转、修改锚点（进度0%）
+   1.1.2 鼠标修改坐标、旋转、修改锚点（进度50%）
 
-  2.2 图片编辑（进度0%）
+  2.2 图片编辑（进度30%）
  
 ![cup](https://user-images.githubusercontent.com/52105884/162568214-db6f3c9c-c8b8-4956-8f59-65f54a5bb67c.PNG)
 
@@ -79,7 +87,7 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
 
  图形化界面优化>（进度80%）
 
- 1. 菜单功能（进度15%）
+ 1. 菜单功能（进度65%）
 
   1.1 文件
 
