@@ -2,36 +2,43 @@ package javaev.io;
 
 import java.io.File;
 
-import java.net.FileNameMap;
-
 import java.util.Properties;
 
-public class FileNameMapUtils implements FileNameMap {
-
+public class FileNameMapUtils {
 	private static String ContentTypeUnknown = "application/octet-stream";
 
 	public static String getContentTypeForFileNameSuffix(String suffix) {
-		if(null == suffix) {
-			return null;
+		if (null != suffix) {
+			String contentType = getContentTypePropertiesDefault().getProperty(suffix.toLowerCase());
+			if (null == contentType) {
+				contentType = ContentTypeUnknown;
+			}
+			return contentType;
 		}
-		String contentType = getContentTypePropertiesDefault().getProperty(suffix.toLowerCase());
-		if (null == contentType) {
-			contentType = ContentTypeUnknown;
-		}
-		return contentType;
+		return null;
 	}
 
 	private static Properties getContentTypeProperties() {
 		Properties prop = new Properties();
+		prop.put(".jpg", "image/jpg");
+		prop.put(".jpeg", "image/jpeg");
+		prop.put(".gif", "image/gif");
+		prop.put(".tiff", "image/tiff");
 		prop.put(".bmp", "image/bmp");
 		prop.put(".png", "image/png");
 		prop.put(".wbmp", "image/wbmp");
 		prop.put(".datauri", "image/base64");
-		prop.put(".csv", "text/csv");
+		prop.put(".json", "text/json");
+		prop.put(".txt", "text/text");
 		prop.put(".ini", "text/setting");
 		prop.put(".xml", "text/xml");
+		prop.put(".htm", "text/htm");
+		prop.put(".html", "text/html");
 		prop.put(".js", "text/javascrpit");
 		prop.put(".css", "text/css");
+		prop.put(".csv", "document/csv");
+		prop.put(".psb", "document/psb");
+		prop.put(".psd", "document/psd");
 		prop.put(".pdf", "document/pdf");
 		prop.put(".rtf", "document/rtf");
 		prop.put(".doc", "document/word 97-2003");
@@ -47,6 +54,11 @@ public class FileNameMapUtils implements FileNameMap {
 		prop.put(".ogg", "audio/ogg");
 		prop.put(".m4a", "audio/apple");
 		prop.put(".aac", "audio/apple");
+		prop.put(".wav", "audio/wave");
+		prop.put(".wave", "audio/wave");
+		prop.put(".aiff", "audio/aiff");
+		prop.put(".au", "audio/au");
+		prop.put(".mac", "audio/mac");
 		return prop;
 	}
 
@@ -66,44 +78,31 @@ public class FileNameMapUtils implements FileNameMap {
 		return getContentTypeForFileNameSuffix(fileUtils.getFileNameSuffix(file));
 	}
 
-	@Override
 	public String getContentTypeFor(String fileName) {
-		if (null == fileName) {
-			return null;
+		if (null != fileName) {
+			try {
+				return getContentTypeFor(new File(fileName));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		return getContentTypeFor(new File(fileName));
+		return null;
 	}
 
 	public boolean isFileAudio(File file) {
 		return isTypeFile(getContentTypeFor(file), type_audio);
 	}
 
-	public boolean isFileAudio(String filePath) {
-		return isTypeFile(getContentTypeFor(filePath), type_audio);
-	}
-
 	public boolean isFileDocument(File file) {
 		return isTypeFile(getContentTypeFor(file), type_document);
-	}
-
-	public boolean isFileDocument(String filePath) {
-		return isTypeFile(getContentTypeFor(filePath), type_document);
 	}
 
 	public boolean isFileImage(File file) {
 		return isTypeFile(getContentTypeFor(file), type_image);
 	}
 
-	public boolean isFileImage(String filePath) {
-		return isTypeFile(getContentTypeFor(filePath), type_image);
-	}
-
 	public boolean isFileText(File file) {
 		return isTypeFile(getContentTypeFor(file), type_text);
-	}
-
-	public boolean isFileText(String filePath) {
-		return isTypeFile(getContentTypeFor(filePath), type_text);
 	}
 
 	private boolean isTypeFile(String typeName, int typeStyle) {
@@ -137,9 +136,4 @@ public class FileNameMapUtils implements FileNameMap {
 	public boolean isVideoFile(File file) {
 		return isTypeFile(getContentTypeFor(file), type_video);
 	}
-
-	public boolean isVideoFile(String filePath) {
-		return isTypeFile(getContentTypeFor(filePath), type_video);
-	}
-
 }
