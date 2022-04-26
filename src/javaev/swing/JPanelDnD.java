@@ -3,6 +3,7 @@ package javaev.swing;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
@@ -18,7 +19,6 @@ import java.util.List;
 import javax.swing.JPanel;
 
 public class JPanelDnD extends JPanel implements DropTargetListener {
-
 	/**
 	 * @author Sureness
 	 */
@@ -46,18 +46,16 @@ public class JPanelDnD extends JPanel implements DropTargetListener {
 	@Override
 	public void drop(DropTargetDropEvent dtde) {
 		DataFlavor dataFlavor = DataFlavor.javaFileListFlavor;
-//		System.out.println(dataFlavor);
 		if (dtde.isDataFlavorSupported(dataFlavor)) {
 			dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 			Transferable transferable = dtde.getTransferable();
 			try {
-				fileList = (List<File>) transferable.getTransferData(dataFlavor);
+				setDropResources((List<File>) transferable.getTransferData(dataFlavor));
 			} catch (UnsupportedFlavorException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			setDropResources(fileList);
 			dtde.dropComplete(true);
 		}
 	}
@@ -73,5 +71,4 @@ public class JPanelDnD extends JPanel implements DropTargetListener {
 	public void setDropResources(List<File> list) {
 		fileList = list;
 	}
-
 }
