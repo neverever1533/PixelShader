@@ -82,7 +82,6 @@ public class ObjectUtils {
 					return Double.valueOf(stringObject);
 				}
 			}
-
 		}
 		return stringObject;
 	}
