@@ -85,7 +85,7 @@ public class FileUtils {
 		return null;
 	}
 
-	public File getFile(File file, Object name, String suffix) {
+	public File getFile(File file, Object name, boolean isReplace, String suffix) {
 		if (null != file && null != suffix) {
 			File dir;
 			String fileName;
@@ -98,7 +98,7 @@ public class FileUtils {
 			}
 			StringBuffer sbuf = new StringBuffer();
 			if (null != dir && null != fileName) {
-				if (null == name) {
+				if (null == name || !isReplace) {
 					sbuf.append(fileName);
 				} else {
 					sbuf.append(name);
@@ -110,30 +110,13 @@ public class FileUtils {
 		return null;
 	}
 
+	public File getFile(File file, Object name, String suffix) {
+		return getFile(file, name, false, suffix);
+	}
+
 	public File getFile(File file, String suffix) {
 		return getFile(file, null, suffix);
 	}
-	
-//	public File getFile(File file, Object name, String suffix) {
-//		if (null != file) {
-//			File d = file.getParentFile();
-//			String prefix = getFileNamePrefix(file);
-//			if (null != d) {
-//				StringBuffer sbuf = new StringBuffer();
-//				if (null != prefix) {
-//					sbuf.append(prefix);
-//				}
-//				if (null != name) {
-//					sbuf.append(name);
-//				}
-//				if (null != suffix) {
-//					sbuf.append(suffix);
-//				}
-//				return new File(d, sbuf.toString());
-//			}
-//		}
-//		return null;
-//	}
 
 	public File getFile(List<File> list, String fileName) {
 		if (null != list && null != fileName) {
@@ -229,6 +212,10 @@ public class FileUtils {
 
 	public String[] getFilePathArray(File[] fileArray) {
 		return toStringArray(fileArray, false);
+	}
+
+	public File getFileReplace(File file, Object name, String suffix) {
+		return getFile(file, name, true, suffix);
 	}
 
 	public ImageLayer getImageLayer(List<ImageLayer> list, File file) {
