@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.Properties;
 
 import javaev.imageio.ImageIOUtils;
+
 import javaev.lang.ObjectUtils;
 
 public class ImageLayer {
@@ -16,53 +17,30 @@ public class ImageLayer {
 
 	private Point anchorLayer;
 
-	private double angleLayer;
-
 	private int depthLayer = -1;
 
+	private double gravityLayer;
+
 	private ImageIOUtils imageIOUtils = new ImageIOUtils();
-
-//	private FileNameMapUtils fileNameMapUtils = new FileNameMapUtils();
-
-//	private File imageFileLayer;
 
 	private BufferedImage imageLayer;
 
 	private String imagePathLayer;
 
 	private boolean isAlphaLayer;
+	private boolean isGravityLayer;
 	private boolean isVisibleLayer;
 
-//	private List<File> layerChildren;
-//
-//	private File layerParent;
-
-	private Point leafLayer;
 	private Point locationLayer;
 
 	private ObjectUtils objectUtils = new ObjectUtils();
 
 	private Point rootLayer;
 
+	private double rotateLayer;
+
 	private Dimension scaleLayer;
 	private Dimension sizeLayer;
-
-//	public void addChild(ImageLayer layer) {
-//		if (null != layer) {
-//			if (null == layerChildren) {
-//				layerChildren = new LinkedList<>();
-//			}
-//			File fileChild = layer.getImageFile();
-//			if (layer.getChildCount() == 0 && null == layer.getParent()) {
-//				layer.setParent(this);
-//				layerChildren.add(fileChild);
-//			}
-//		}
-//	}
-
-	public Dimension geScale() {
-		return scaleLayer;
-	}
 
 	public float getAlpha() {
 		return alphaLayer;
@@ -72,24 +50,12 @@ public class ImageLayer {
 		return anchorLayer;
 	}
 
-	public double getAngleRotated() {
-		return angleLayer;
-	}
-
-//	public int getChildCount() {
-//		if (null != layerChildren) {
-//			return layerChildren.size();
-//		} else {
-//			return 0;
-//		}
-//	}
-
-//	public List<File> getChildren() {
-//		return layerChildren;
-//	}
-
 	public int getDepth() {
 		return depthLayer;
+	}
+
+	public double getGravity() {
+		return gravityLayer;
 	}
 
 	public BufferedImage getImage() {
@@ -98,14 +64,6 @@ public class ImageLayer {
 
 	public String getImagePath() {
 		return imagePathLayer;
-	}
-
-//	public File getParent() {
-//		return layerParent;
-//	}
-
-	public Point getLeaf() {
-		return leafLayer;
 	}
 
 	public Point getLocation() {
@@ -119,25 +77,17 @@ public class ImageLayer {
 		if (null != anchor) {
 			properties.put("anchor", anchor);
 		}
-		properties.put("angle", getAngleRotated());
 		properties.put("depth", getDepth());
+		properties.put("gravity", getGravity());
 		String imagePath = getImagePath();
 		if (null != imagePath) {
 			properties.put("imagePath", imagePath);
-		}
-		properties.put("isVisible", isVisible());
-		Point leaf = getLeaf();
-		if (null != leaf) {
-			properties.put("leaf", leaf);
 		}
 		Point location = getLocation();
 		if (null != location) {
 			properties.put("location", location);
 		}
-		Point root = getRoot();
-		if (null != root) {
-			properties.put("root", root);
-		}
+		properties.put("rotated", getRotated());
 		Dimension scale = getScale();
 		if (null != scale) {
 			properties.put("scale", scale);
@@ -146,11 +96,22 @@ public class ImageLayer {
 		if (null != size) {
 			properties.put("size", size);
 		}
+		Point root = getRoot();
+		if (null != root) {
+			properties.put("root", root);
+		}
+		properties.put("isAlpha", isAlpha());
+		properties.put("isGravity", isGravity());
+		properties.put("isVisible", isVisible());
 		return properties;
 	}
 
 	public Point getRoot() {
 		return rootLayer;
+	}
+
+	public double getRotated() {
+		return rotateLayer;
 	}
 
 	public Dimension getScale() {
@@ -169,22 +130,24 @@ public class ImageLayer {
 		isAlphaLayer = isAlpha;
 	}
 
-//	public void removeChild(ImageLayer child) {
-//		if (null != child && null != layerChildren) {
-//			File fileChild = child.getImageFile();
-//			if (null != fileChild) {
-//				child.setParent(null);
-//				layerChildren.remove(fileChild);
-//			}
-//		}
-//	}
+	public boolean isGravity() {
+		return isGravityLayer;
+	}
+
+	public void isGravity(boolean isGravity) {
+		if (isGravityLayer != isGravity) {
+			isGravityLayer = isGravity;
+		}
+	}
 
 	public boolean isVisible() {
 		return isVisibleLayer;
 	}
 
 	public void isVisible(boolean isVisible) {
-		isVisibleLayer = isVisible;
+		if (isVisibleLayer != isVisible) {
+			isVisibleLayer = isVisible;
+		}
 	}
 
 	public void read(File file) {
@@ -235,13 +198,12 @@ public class ImageLayer {
 		anchorLayer = anchor;
 	}
 
-	public void setAngleRotated(double angle) {
-		angle = angle % 360;
-		angleLayer = angle;
-	}
-
 	public void setDepth(int depth) {
 		depthLayer = depth;
+	}
+
+	public void setGravity(double angle) {
+		gravityLayer = angle % 360;
 	}
 
 	public void setImage(BufferedImage image) {
@@ -262,31 +224,10 @@ public class ImageLayer {
 		imagePathLayer = filePath;
 	}
 
-	public void setLeaf(double lx, double ly) {
-		Point point = new Point();
-		point.setLocation(lx, ly);
-		setLeaf(point);
-	}
-
-//	public void setParent(ImageLayer layer) {
-//		if (null != layer) {
-//			File file = layer.getImageFile();
-//			if (null != file && getChildCount() == 0) {
-//				layerParent = file;
-//				layer.addChild(this);
-//			}
-//		}
-//	}
-
-	public void setLeaf(Point leaf) {
-		leafLayer = leaf;
-	}
-
 	public void setLocation(double tx, double ty) {
 		Point point = new Point();
 		point.setLocation(tx, ty);
 		setLocation(point);
-
 	}
 
 	public void setLocation(Point location) {
@@ -311,8 +252,8 @@ public class ImageLayer {
 			value = properties.getProperty("alpha");
 			if (null != value) {
 				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Float) {
-					setAlpha((float) object);
+				if (null != object && object instanceof Double) {
+					setAlpha(Float.valueOf(value));
 				}
 			}
 			value = properties.getProperty("anchor");
@@ -322,18 +263,25 @@ public class ImageLayer {
 					setAnchor((Point) object);
 				}
 			}
-			value = properties.getProperty("angle");
+			value = properties.getProperty("gravity");
 			if (null != value) {
 				object = objectUtils.getObject(value);
 				if (null != object && object instanceof Double) {
-					setAngleRotated((double) object);
+					setGravity((double) object);
 				}
 			}
-			value = properties.getProperty("depth");
+			value = properties.getProperty("isAlpha");
 			if (null != value) {
 				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Integer) {
-					setDepth((int) object);
+				if (null != object && object instanceof Boolean) {
+					isAlpha((boolean) object);
+				}
+			}
+			value = properties.getProperty("isGravity");
+			if (null != value) {
+				object = objectUtils.getObject(value);
+				if (null != object && object instanceof Boolean) {
+					isGravity((boolean) object);
 				}
 			}
 			value = properties.getProperty("isVisible");
@@ -343,11 +291,11 @@ public class ImageLayer {
 					isVisible((boolean) object);
 				}
 			}
-			value = properties.getProperty("leaf");
+			value = properties.getProperty("depth");
 			if (null != value) {
 				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Point) {
-					setLeaf((Point) object);
+				if (null != object && object instanceof Double) {
+					setDepth(Integer.valueOf(value));
 				}
 			}
 			value = properties.getProperty("location");
@@ -364,6 +312,13 @@ public class ImageLayer {
 					setRoot((Point) object);
 				}
 			}
+			value = properties.getProperty("rotated");
+			if (null != value) {
+				object = objectUtils.getObject(value);
+				if (null != object && object instanceof Double) {
+					setRotated((double) object);
+				}
+			}
 			value = properties.getProperty("scale");
 			if (null != value) {
 				object = objectUtils.getObject(value);
@@ -377,11 +332,16 @@ public class ImageLayer {
 	public void setRoot(double rx, double ry) {
 		Point point = new Point();
 		point.setLocation(rx, ry);
-		setLeaf(point);
+		setRoot(point);
 	}
 
 	public void setRoot(Point root) {
 		rootLayer = root;
+	}
+
+	public void setRotated(double angle) {
+		angle = angle % 360;
+		rotateLayer = angle;
 	}
 
 	public void setSize(Dimension dimension) {
@@ -396,9 +356,13 @@ public class ImageLayer {
 				scaleHeight = 1;
 			}
 			scale(scaleWidth, scaleHeight);
-			setAnchor(dimension.getWidth() / 2, dimension.getHeight() / 2);
+			double x = dimension.getWidth() / 2;
+			double y = dimension.getHeight() / 2;
+			setAnchor(x, y);
+			setRoot(x, y);
 		} else {
 			setAnchor(null);
+			setRoot(null);
 		}
 		sizeLayer = dimension;
 	}
