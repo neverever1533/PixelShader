@@ -9,18 +9,29 @@ public class MathUtils {
 	}
 
 	public static Point rotate(double theta, double x, double y) {
+		return rotate(theta, 0, 0, x, y);
+	}
+
+	public static Point rotate(double theta, double xc, double yc, double x, double y) {
 		double sint = Math.sin(theta);
 		double cost = Math.cos(theta);
-		double xp = x * cost - y * sint;
-		double yp = x * sint + y * sint;
+		double xr = (x - xc) * cost - (y - yc) * sint + xc;
+		double yr = (x - xc) * sint + (y - yc) * sint + yc;
 		Point point = new Point();
-		point.setLocation(xp, yp);
+		point.setLocation(xr, yr);
 		return point;
 	}
 
 	public static Point rotate(double theta, Point point) {
 		if (null != point) {
 			return rotate(theta, point.getX(), point.getY());
+		}
+		return null;
+	}
+
+	public static Point rotate(double theta, Point pointAnchor, Point point) {
+		if (null != point) {
+			return rotate(theta, pointAnchor.getX(), pointAnchor.getY(), point.getX(), point.getY());
 		}
 		return null;
 	}
