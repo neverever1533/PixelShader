@@ -5,7 +5,7 @@
 
 说明：
 
-  本项目由 eclipse java-2022-03 版本创建，安装有 eclipse 类软件的可使用项目源码打包使用，不会打包项目的请下载 ① PixelShaderUI_for_JavaSE-1.8_v.40.3.jar；下载 ② lib 文件夹（其内 cn.imaginary.toolkit.v3.6.jar 和psd-library-001.jar 为项目依赖包必须下载）；
+  本项目由 eclipse java-2022-03 版本创建，安装有 eclipse 类软件的可使用项目源码打包使用，不会打包项目的请下载 ① PixelShaderUI_for_JavaSE-1.8_v.40.3.jar；下载 ② lib 文件夹（其内 cn.imaginary.toolkit.v3.6.jar 和psd-library-001.jar 为项目依赖包，psd文件java支持库来源:http://code.google.com/p/java-psd-library/）；
     
   并未安装 Java 环境或运行出错，请使用以下方法获得 Java 环境支持以体验本项目相关小工具：
 
@@ -43,11 +43,25 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
 
 项目计划：
 
+计划五：
+
+支持更新（25%）（这个psd库比较旧了，部分psd读取后丢失图层，有时间再替换掉）
+
+图形算法（15%）
+
+ 像素扭曲功能待加入
+
+---------分割线---------
+
 计划四：
 
- 联动继承（进度0%）
+ 1. 联动继承（进度80%）
  
- 图帧编辑（进度60%）
+  父子关系已由树状JTree接管，图层分组后可同步位移或相对旋转；
+ 
+ 2. 图帧编辑（进度60%）
+
+  基础的位移，旋转已实现，待加入图片扭曲；
  
 ![20](https://user-images.githubusercontent.com/52105884/165331163-fb80a4d5-7de4-44de-9e16-13a465eee20c.PNG)
 
