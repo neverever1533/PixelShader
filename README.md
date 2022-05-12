@@ -5,8 +5,14 @@
 
 说明：
 
-  本项目由 eclipse java-2022-03 版本创建，安装有 eclipse 类软件的可使用项目源码打包使用，不会打包项目的请下载 ① PixelShaderUI_for_JavaSE-1.8_v.40.3.jar；下载 ② lib 文件夹（其内 cn.imaginary.toolkit.v3.6.jar 和psd-library-001.jar 为项目依赖包，psd文件java支持库来源:http://code.google.com/p/java-psd-library/）；
-    
+  本项目由 eclipse java-2022-03 版本创建，安装有 eclipse 类软件的可使用项目源码打包使用，不会打包项目的请下载
+
+  ① PixelShaderUI_for_JavaSE-1.8_v.40.3.jar；
+
+  ② lib 文件夹（其内 cn.imaginary.toolkit.v3.6.jar 和psd-library-001.jar 为项目依赖包）；
+
+  psd文件java支持库来源:http://code.google.com/p/java-psd-library/
+
   并未安装 Java 环境或运行出错，请使用以下方法获得 Java 环境支持以体验本项目相关小工具：
 
 1. 安装对应版本 Java 安装包（未安装Java环境的用户）：
