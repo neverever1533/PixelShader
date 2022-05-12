@@ -8,13 +8,22 @@ public class CollectionsUtils {
 	public static <T> String toString(List<T> list) {
 		if (null != list) {
 			StringBuffer sbuf = new StringBuffer();
+			sbuf.append("[");
+			int index = 0;
 			Object object;
 			for (Iterator<T> iterator = list.iterator(); iterator.hasNext();) {
 				object = iterator.next();
+				if (index != 0) {
+					sbuf.append(", ");
+				}
 				if (null != object) {
 					sbuf.append(object.toString());
+				} else {
+					sbuf.append("null");
 				}
+				index++;
 			}
+			sbuf.append("]");
 			return sbuf.toString();
 		}
 		return null;
@@ -30,7 +39,8 @@ public class CollectionsUtils {
 
 	/**
 	 * 筛选重复元素并添加到新列表；
-	 * @param <T> 对象类型；
+	 * 
+	 * @param <T>  对象类型；
 	 * @param src  含有复数Object的列表；
 	 * @param dest 含有单数Object的列表；
 	 */
