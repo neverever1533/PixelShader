@@ -51,7 +51,7 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
 
 ![pb-1](https://user-images.githubusercontent.com/52105884/168308808-2872eb73-5346-42a4-bf1a-355ba6244089.PNG)
 
-![pb-0](https://user-images.githubusercontent.com/52105884/168314542-97da3def-8ab2-4122-9a90-732a1fbc6f8f.PNG)
+![pb](https://user-images.githubusercontent.com/52105884/168317856-f617afc1-c057-477a-8684-2d4a3e1784d5.png)
 
 ps.此看板娘psd小人儿作者：【脆皮酥炸蜜汁金黄炸鸡腿】
 
