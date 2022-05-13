@@ -42,6 +42,20 @@ public class ImageLayer {
 	private Dimension scaleLayer;
 	private Dimension sizeLayer;
 
+	private String tag_alpha = "alpha";
+	private String tag_anchor = "anchor";
+	private String tag_depth = "depth";
+	private String tag_gravity = "gravity";
+	private String tag_imagePath = "imagePath";
+	private String tag_isAlpha = "isAlpha";
+	private String tag_isGravity = "isGravity";
+	private String tag_isVisible = "isVisible";
+	private String tag_location = "location";
+	private String tag_root = "root";
+	private String tag_rotated = "rotated";
+	private String tag_scale = "scale";
+	private String tag_size = "size";
+
 	public float getAlpha() {
 		return alphaLayer;
 	}
@@ -72,37 +86,37 @@ public class ImageLayer {
 
 	public Properties getProperties() {
 		Properties properties = new Properties();
-		properties.put("alpha", getAlpha());
+		properties.put(tag_alpha, getAlpha());
 		Point anchor = getAnchor();
 		if (null != anchor) {
-			properties.put("anchor", anchor);
+			properties.put(tag_anchor, anchor);
 		}
-		properties.put("depth", getDepth());
-		properties.put("gravity", getGravity());
+		properties.put(tag_depth, getDepth());
+		properties.put(tag_gravity, getGravity());
 		String imagePath = getImagePath();
 		if (null != imagePath) {
-			properties.put("imagePath", imagePath);
+			properties.put(tag_imagePath, imagePath);
 		}
 		Point location = getLocation();
 		if (null != location) {
-			properties.put("location", location);
+			properties.put(tag_location, location);
 		}
-		properties.put("rotated", getRotated());
+		properties.put(tag_rotated, getRotated());
 		Dimension scale = getScale();
 		if (null != scale) {
-			properties.put("scale", scale);
+			properties.put(tag_scale, scale);
 		}
 		Dimension size = getSize();
 		if (null != size) {
-			properties.put("size", size);
+			properties.put(tag_size, size);
 		}
 		Point root = getRoot();
 		if (null != root) {
-			properties.put("root", root);
+			properties.put(tag_root, root);
 		}
-		properties.put("isAlpha", isAlpha());
-		properties.put("isGravity", isGravity());
-		properties.put("isVisible", isVisible());
+		properties.put(tag_isAlpha, isAlpha());
+		properties.put(tag_isGravity, isGravity());
+		properties.put(tag_isVisible, isVisible());
 		return properties;
 	}
 
@@ -237,93 +251,143 @@ public class ImageLayer {
 	public void setProperties(Properties properties) {
 		if (null != properties) {
 			Object object;
-			String value;
-			value = properties.getProperty("imagePath");
+			Object value;
+			String value_String;
+			value = properties.get(tag_imagePath);
+			value_String = String.valueOf(value);
 			if (null != value) {
-				read(value);
+				read(value_String);
 			}
-			value = properties.getProperty("size");
+			value = properties.get(tag_size);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Dimension) {
-					setSize((Dimension) object);
+				if (value instanceof Dimension) {
+					setSize((Dimension) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Dimension) {
+						setSize((Dimension) object);
+					}
 				}
 			}
-			value = properties.getProperty("alpha");
+			value = properties.get(tag_alpha);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Double) {
-					setAlpha(Float.valueOf(value));
+				if (value instanceof Float) {
+					setAlpha((float) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Double) {
+						setAlpha(Float.valueOf(value_String));
+					}
 				}
 			}
-			value = properties.getProperty("anchor");
+			value = properties.get(tag_anchor);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Point) {
-					setAnchor((Point) object);
+				if (value instanceof Point) {
+					setAnchor((Point) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Point) {
+						setAnchor((Point) object);
+					}
 				}
 			}
-			value = properties.getProperty("gravity");
+			value = properties.get(tag_gravity);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Double) {
-					setGravity((double) object);
+				if (value instanceof Double) {
+					setGravity((double) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Double) {
+						setGravity((double) object);
+					}
 				}
 			}
-			value = properties.getProperty("isAlpha");
+			value = properties.get(tag_isAlpha);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Boolean) {
-					isAlpha((boolean) object);
+				if (value instanceof Boolean) {
+					isAlpha((boolean) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Boolean) {
+						isAlpha((boolean) object);
+					}
 				}
 			}
-			value = properties.getProperty("isGravity");
+			value = properties.get(tag_isGravity);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Boolean) {
-					isGravity((boolean) object);
+				if (value instanceof Boolean) {
+					isGravity((boolean) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Boolean) {
+						isGravity((boolean) object);
+					}
 				}
 			}
-			value = properties.getProperty("isVisible");
+			value = properties.get(tag_isVisible);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Boolean) {
-					isVisible((boolean) object);
+				if (value instanceof Boolean) {
+					isVisible((boolean) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Boolean) {
+						isVisible((boolean) object);
+					}
 				}
 			}
-			value = properties.getProperty("depth");
+			value = properties.get(tag_depth);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Double) {
-					setDepth(Integer.valueOf(value));
+				if (value instanceof Integer) {
+					setDepth((int) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Double) {
+						setDepth(Integer.valueOf(value_String));
+					}
 				}
 			}
-			value = properties.getProperty("location");
+			value = properties.get(tag_location);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Point) {
-					setLocation((Point) object);
+				if (value instanceof Point) {
+					setLocation((Point) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Point) {
+						setLocation((Point) object);
+					}
 				}
 			}
-			value = properties.getProperty("root");
+			value = properties.get(tag_root);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Point) {
-					setRoot((Point) object);
+				if (value instanceof Point) {
+					setRoot((Point) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Point) {
+						setRoot((Point) object);
+					}
 				}
 			}
-			value = properties.getProperty("rotated");
+			value = properties.get(tag_rotated);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Double) {
-					setRotated((double) object);
+				if (value instanceof Double) {
+					setRotated((double) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Double) {
+						setRotated((double) object);
+					}
 				}
 			}
-			value = properties.getProperty("scale");
+			value = properties.get(tag_scale);
 			if (null != value) {
-				object = objectUtils.getObject(value);
-				if (null != object && object instanceof Dimension) {
-					scale((Dimension) object);
+				if (value instanceof Dimension) {
+					scale((Dimension) value);
+				} else {
+					object = objectUtils.getObject(value_String);
+					if (null != object && object instanceof Dimension) {
+						scale((Dimension) object);
+					}
 				}
 			}
 		}
