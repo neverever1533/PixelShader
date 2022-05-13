@@ -64,7 +64,11 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
  1. 联动继承（进度80%）
  
   父子关系已由树状JTree接管，图层分组后可同步位移或相对旋转；
- 
+
+![pb-4](https://user-images.githubusercontent.com/52105884/168302933-9ad8684f-0e3a-4996-b27b-8556a419376a.PNG)
+
+![pb-5](https://user-images.githubusercontent.com/52105884/168302999-437aaa9a-912e-4368-9e03-8f0bafa2f924.PNG)
+
  2. 图帧编辑（进度60%）
 
   基础的位移，旋转已实现，待加入图片扭曲；
