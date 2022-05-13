@@ -22,12 +22,13 @@ import psd.model.Psd;
 public class PSDFileReader {
 	private FileUtils fileUtils = FileUtils.getInstance();
 
-	/*public static void main(String[] args) {
+	public static void main(String[] args) {
 		PSDFileReader pfr = new PSDFileReader();
 		ArrayList<ImageLayer> aList = new ArrayList<>();
 		String fp = "e:\\Downloads\\Models\\Evolution Vector Model\\未标题-1.psd";
 		File f = new File(fp);
 		pfr.read(f, aList);
+//		System.out.println(CollectionsUtils.toString(aList));
 		ImageLayer layer;
 		for (Iterator<ImageLayer> iterator = aList.iterator(); iterator.hasNext();) {
 			layer = (ImageLayer) iterator.next();
@@ -35,7 +36,7 @@ public class PSDFileReader {
 				System.out.println(layer.getProperties());
 			}
 		}
-	}*/
+	}
 
 	public List<ImageLayer> read(File file, List<ImageLayer> layerList) {
 		if (null != file && null != layerList) {
@@ -56,7 +57,7 @@ public class PSDFileReader {
 						x = layer.getX();
 						y = layer.getY();
 						alpha = layer.getAlpha() / 255;
-						fileTemp = fileUtils.getFile(file, i, ImageIOUtils.FileSuffixes_Default);
+						fileTemp = fileUtils.getFileReplace(file, i, ImageIOUtils.FileSuffixes_Default);
 						imageLayer = new ImageLayer();
 						imageLayer.setImage(image);
 						imageLayer.setImagePath(fileTemp.getPath());
