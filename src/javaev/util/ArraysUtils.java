@@ -7,6 +7,10 @@ import java.util.List;
 import javaev.lang.ObjectUtils;
 
 public class ArraysUtils {
+	private static String tag_bracket_close = ObjectUtils.tag_bracket_close;
+	private static String tag_bracket_open = ObjectUtils.tag_bracket_open;
+	private static String tag_split = ObjectUtils.tag_split;
+	
 	public static boolean contains(Object[] array, Object object) {
 		if (null != array) {
 			List<Object> list = Arrays.asList(array);
@@ -98,118 +102,118 @@ public class ArraysUtils {
 
 	public static String toString(boolean[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(byte[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(char[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(double[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(float[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(int[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(long[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(Object[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 
 	public static String toString(short[][] arrays) {
 		StringBuffer sbuf = new StringBuffer();
-		sbuf.append("[");
+		sbuf.append(tag_bracket_open);
 		for (int i = 0; i < arrays.length; i++) {
 			if (i != 0) {
-				sbuf.append(", ");
+				sbuf.append(tag_split);
 			}
 			sbuf.append(Arrays.toString(arrays[i]));
 		}
-		sbuf.append("]");
+		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
 }
