@@ -83,8 +83,8 @@ public class PixelShaderUI extends JFrame {
 	private static final long serialVersionUID = 4247417000065494012L;
 
 	public static void main(String[] args) {
-		PixelShaderUI tui = new PixelShaderUI();
-		tui.setVisible(true);
+		PixelShaderUI pixelShaderUI = new PixelShaderUI();
+		pixelShaderUI.setVisible(true);
 	}
 
 	private Color bgColor = Color.black;
@@ -98,16 +98,14 @@ public class PixelShaderUI extends JFrame {
 
 	private CollectionsUtils collectionsUtils = new CollectionsUtils();
 
+	private String encoding_default = "utf-8";
+
 	private Color fgColor = Color.white;
 
 	private int fileFilterStyle_Image = 8;
 	private int fileFilterStyle_Layer = 5;
 	private int fileFilterStyle_Project = 0;
 	private int fileFilterStyle_PS = 2;
-
-	public String fileSuffixes_Image = ".png";
-	public String fileSuffixes_Layer = ".pxl";
-	public String fileSuffixes_Project = ".evp";
 
 	private FileUtils fileUtils = FileUtils.getInstance();
 
@@ -135,13 +133,13 @@ public class PixelShaderUI extends JFrame {
 
 	private JFileChooser jFileChooser;
 
-	private JLabel jLabelView;;
+	private JLabel jLabelView;
 
 	private JPanel jPanelGraphics;
 
 	private JTextField jTextFieldAlpha;
 	private JTextField jTextFieldAnchorX;
-	private JTextField jTextFieldAnchorY;
+	private JTextField jTextFieldAnchorY;;
 	private JTextField jTextFieldAngle;
 	private JTextField jTextFieldCanvasX;
 	private JTextField jTextFieldCanvasY;
@@ -159,11 +157,17 @@ public class PixelShaderUI extends JFrame {
 
 	private List<ImageLayer> layerListRoot;
 
+	private PropertiesUtils propertiesUtils = new PropertiesUtils();
+
+	public String suffixes_Image = ".png";
+	public String suffixes_Layer = ".pxl";
+	public String suffixes_Project = ".evp";
+
 	private DefaultTreeCellRendererUtils treeCellRenderer;
 
 	public PixelShaderUI() {
 		super();
-		setTitle("PixelShader ver.52.1e08.p310_alpha by Sev末夜");
+		setTitle("PixelShader ver.56.6e0d.a820_alpha by Sev末夜");
 		initGUI();
 	}
 
@@ -312,11 +316,11 @@ public class PixelShaderUI extends JFrame {
 	}
 
 	private File getFileLayer(File file) {
-		return fileUtils.getFile(file, fileSuffixes_Layer);
+		return fileUtils.getFile(file, suffixes_Layer);
 	}
 
 	private File getFileProject(File file) {
-		return fileUtils.getFile(file, fileSuffixes_Project);
+		return fileUtils.getFile(file, suffixes_Project);
 	}
 
 	private String getHelpInfo() {
@@ -337,6 +341,12 @@ public class PixelShaderUI extends JFrame {
 		description.append("2.如上操作并将图层拖向任意处，即脱离父节点(parent.png)所在行，直到父节点图层其下失去子节点；");
 		description.append(ln);
 		description.append("ps：按住鼠标并拖动节点可解除父子关系，同时也可以任意更换当前节点的位置。");
+		description.append(ln);
+		description.append("三、删除图层：");
+		description.append(ln);
+		description.append("1.【鼠标】点击（选中）图层节点，右键点击此节点（child.png）；");
+		description.append(ln);
+		description.append("ps：删除图层仅移除树状列表节点内容，且所有操作不改动原始图形文件。");
 		return description.toString();
 	}
 
@@ -389,9 +399,13 @@ public class PixelShaderUI extends JFrame {
 		description.append(ln);
 		description.append("author:Sev末夜");
 		description.append(ln);
-		description.append("ver.52.1e08.p310_alpha");
+		description.append("ver.56.6e0d.a820_alpha");
 		description.append(ln);
-		description.append("new:添加物理重力属性，父子关系图层旋转同步修正，图层编辑树状结构存储为工程；");
+		description.append("new:分组图层变换同步优化，图层编辑树状结构存储为工程；");
+		description.append(ln);
+		description.append("ver.50.1e08.p310_alpha");
+		description.append(ln);
+		description.append("new:添加物理重力属性，父子关系图层旋转同步修正；");
 		description.append(ln);
 		description.append("ver.40.3d17.pa1a_alpha");
 		description.append(ln);
@@ -488,6 +502,7 @@ public class PixelShaderUI extends JFrame {
 							public void actionPerformed(ActionEvent e) {
 //								System.out.println(jMenuItem.getText());
 								loadLayer(Arrays.asList(openFiles(fileFilterStyle_Layer)));
+//								drawResources();
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -504,6 +519,7 @@ public class PixelShaderUI extends JFrame {
 							public void actionPerformed(ActionEvent e) {
 //								System.out.println(jMenuItem.getText());
 								loadLayer(Arrays.asList(openFiles(fileFilterStyle_Project)));
+//								drawResources();
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -819,9 +835,7 @@ public class PixelShaderUI extends JFrame {
 					JPanel jPanel = new JPanel();
 					jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
 					{
-//						Dimension dimensionJToolBar = new Dimension(256, 24);
 						Dimension dimensionJTextField = new Dimension(64, 24);
-//						Dimension dimensionJButton = new Dimension(24, 24);
 						{
 							JToolBar jToolBar = new JToolBar();
 							{
@@ -1408,7 +1422,6 @@ public class PixelShaderUI extends JFrame {
 												dtm.removeNodeFromParent(treeNodeSelected);
 												Object object;
 												String pathName;
-//												File file;
 												if (treeNodeSelected.getChildCount() != 0) {
 													DefaultMutableTreeNode treeNode;
 													for (@SuppressWarnings("unchecked")
@@ -1476,7 +1489,6 @@ public class PixelShaderUI extends JFrame {
 					JPanel jPanel = new JPanel();
 					jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
 					{
-//						Dimension dimensionJToolBar = new Dimension(256, 24);
 						Dimension dimensionJTextField = new Dimension(64, 24);
 						{
 							JToolBar jToolBar = new JToolBar();
@@ -1700,7 +1712,6 @@ public class PixelShaderUI extends JFrame {
 											double x = toDouble(jTextFieldLocationX);
 											double y = toDouble(jTextFieldLocationY);
 											layerTransform(imageLayerSelected, x, y, imageLayerSelected.getRotated());
-//											layerTransform(imageLayerSelected, x, y, -1);
 											if (isLocationCenter) {
 												isLocationCenter = false;
 											}
@@ -1788,7 +1799,7 @@ public class PixelShaderUI extends JFrame {
 			Properties prop;
 			PropertiesUtils pu = new PropertiesUtils();
 			String commentImage = "Images";
-			String encoding = "utf-8";
+//			String encoding = "utf-8";
 			for (Iterator<ImageLayer> iterator = layerList.iterator(); iterator.hasNext();) {
 				layer = iterator.next();
 				if (null != layer) {
@@ -1802,7 +1813,7 @@ public class PixelShaderUI extends JFrame {
 								imageExport(layer.getImage(), imageFile);
 							}
 							propFile = getFileLayer(imageFile);
-							fileUtils.storeProperties(propFile, prop, commentImage, encoding);
+							propertiesUtils.storeProperties(prop, true, propFile, commentImage, encoding_default);
 							if (isExportProject) {
 								properties.put(imageFile.getName(), propFile.getAbsolutePath());
 							}
@@ -1812,7 +1823,7 @@ public class PixelShaderUI extends JFrame {
 			}
 			if (null != file && isExportProject) {
 				String commentLayer = "PixelShader ImageLayer";
-				fileUtils.storeProperties(getFileProject(file), properties, commentLayer, encoding);
+				propertiesUtils.storeProperties(properties, true, getFileProject(file), commentLayer, encoding_default);
 			}
 		}
 	}
@@ -1821,15 +1832,15 @@ public class PixelShaderUI extends JFrame {
 		if (null != imageLayer) {
 			int index = layerListRoot.indexOf(imageLayer);
 			Point location = imageLayer.getLocation();
-			double xRate = 0;
-			double yRate = 0;
+			double rateX = 0;
+			double rateY = 0;
 			if (null != location) {
 				double xLayer = location.getX();
 				double yLayer = location.getY();
-				xRate = x - xLayer;
-				yRate = y - yLayer;
+				rateX = x - xLayer;
+				rateY = y - yLayer;
 			}
-			if (xRate != 0 || yRate != 0) {
+			if (rateX != 0 || rateY != 0) {
 				imageLayer.setLocation(x, y);
 			}
 			location = imageLayer.getLocation();
@@ -1853,6 +1864,45 @@ public class PixelShaderUI extends JFrame {
 			if (index != -1) {
 				layerListRoot.set(index, imageLayer);
 			}
+			layerTransformChilds(imageLayer, rateX, rateY, rateRotate, xAnchor, yAnchor);
+		}
+	}
+
+	private void layerTransformChild(ImageLayer layer, double rateX, double rateY, double rateRotate, double xAnchor,
+			double yAnchor) {
+		if (null != layer) {
+			int index;
+			Point locationChild = layer.getLocation();
+			if (rateX != 0 || rateY != 0) {
+				double xc;
+				double yc;
+				if (null != locationChild) {
+					xc = locationChild.getX() + rateX;
+					yc = locationChild.getY() + rateY;
+				} else {
+					xc = rateX;
+					yc = rateY;
+				}
+				layer.setLocation(xc, yc);
+			}
+			locationChild = layer.getLocation();
+			if (null != locationChild && rateRotate != 0) {
+				Point anchorChild = layer.getAnchor();
+				if (null != anchorChild) {
+					layer.setAnchor(xAnchor - locationChild.getX(), yAnchor - locationChild.getY());
+				}
+				layer.setRotated(layer.getRotated() + rateRotate);
+			}
+			index = layerListRoot.indexOf(layer);
+			if (index != -1) {
+				layerListRoot.set(index, layer);
+			}
+		}
+	}
+
+	private void layerTransformChilds(ImageLayer imageLayer, double rateX, double rateY, double rateRotate,
+			double xAnchor, double yAnchor) {
+		if (null != imageLayer) {
 			String imagePath = imageLayer.getImagePath();
 			if (null != imagePath) {
 				DefaultMutableTreeNode treeNode = getTreeNode(jTreeRoot, imagePath);
@@ -1865,12 +1915,6 @@ public class PixelShaderUI extends JFrame {
 					Object object;
 					String fileLayerName;
 					ImageLayer layer;
-					Point locationChild;
-					Point anchorChild;
-					double xc;
-					double yc;
-					double xAnchorChild = 0;
-					double yAnchorChild = 0;
 					for (@SuppressWarnings("unchecked")
 					Enumeration<TreeNode> treeNodeEnumeration = treeNode.children(); treeNodeEnumeration
 							.hasMoreElements();) {
@@ -1880,33 +1924,10 @@ public class PixelShaderUI extends JFrame {
 							if (null != object && object instanceof String) {
 								fileLayerName = (String) object;
 								layer = fileUtils.getImageLayer(layerListRoot, fileLayerName);
-								if (null != layer) {
-									index = layerListRoot.indexOf(layer);
-									locationChild = layer.getLocation();
-									if (xRate != 0 || yRate != 0) {
-										if (null != locationChild) {
-											xc = locationChild.getX() + xRate;
-											yc = locationChild.getY() + yRate;
-										} else {
-											xc = xRate;
-											yc = yRate;
-										}
-										layer.setLocation(xc, yc);
-									}
-									locationChild = layer.getLocation();
-									if (null != locationChild && rateRotate != 0) {
-										anchorChild = layer.getAnchor();
-										if (null != anchorChild) {
-											xAnchorChild = xAnchor - locationChild.getX();
-											yAnchorChild = yAnchor - locationChild.getY();
-											layer.setAnchor(xAnchorChild, yAnchorChild);
-										}
-										layer.setRotated(layer.getRotated() + rateRotate);
-									}
-									if (index != -1) {
-										layerListRoot.set(index, layer);
-									}
+								if (treeNodeChild.getChildCount() != 0) {
+									layerTransformChilds(layer, rateX, rateY, rateRotate, xAnchor, yAnchor);
 								}
+								layerTransformChild(layer, rateX, rateY, rateRotate, xAnchor, yAnchor);
 							}
 						}
 					}
@@ -2022,14 +2043,15 @@ public class PixelShaderUI extends JFrame {
 			depthLayer = String.valueOf(imageLayer.getDepth());
 			gravity = String.valueOf(imageLayer.getGravity());
 		} else {
-			locationX = "0 px";
-			locationY = "0 px";
-			width = "0 px";
-			height = "0 px";
+			String px = "0 px";
+			locationX = px;
+			locationY = px;
+			width = px;
+			height = px;
 			scaleMax = "1倍";
 			angle = "0度";
-			anchorX = "0 px";
-			anchorY = "0 px";
+			anchorX = px;
+			anchorY = px;
 			alphaFloat = "1.0f";
 			depthLayer = "0 层";
 			gravity = "0度";
@@ -2185,7 +2207,7 @@ public class PixelShaderUI extends JFrame {
 			sbuf.append(calendar.get(Calendar.MINUTE));
 			sbuf.append(calendar.get(Calendar.SECOND));
 			sbuf.append(calendar.get(Calendar.MILLISECOND));
-			sbuf.append(fileSuffixes_Image);
+			sbuf.append(suffixes_Image);
 			fileName = sbuf.toString();
 			tempFile = new File(dir, fileName);
 			if (null != layerImage) {
@@ -2193,7 +2215,7 @@ public class PixelShaderUI extends JFrame {
 			}
 		}
 //		else if (style == 2) {
-//			psd
+////			psd
 //		}
 		else if (style == 0) {
 			if (null != layerListRoot) {
@@ -2336,9 +2358,9 @@ public class PixelShaderUI extends JFrame {
 				file = iterator.next();
 				if (null != file) {
 					fileName = file.getName().toLowerCase();
-					if (fileName.endsWith(fileSuffixes_Project)) {
-						fileUtils.setSuffixProperties(fileSuffixes_Project);
-						propLayer = fileUtils.loadProperties(file);
+					if (fileName.endsWith(suffixes_Project)) {
+						propertiesUtils.setSuffixProperties(suffixes_Project);
+						propLayer = propertiesUtils.loadProperties(file, true);
 						if (null != propLayer) {
 							for (Iterator<Object> iteratorProperties = propLayer.values().iterator(); iteratorProperties
 									.hasNext();) {
@@ -2346,8 +2368,8 @@ public class PixelShaderUI extends JFrame {
 								if (null != object && object instanceof String) {
 									layerPath = (String) object;
 									file = new File(layerPath);
-									fileUtils.setSuffixProperties(fileSuffixes_Layer);
-									prop = fileUtils.loadProperties(file);
+									propertiesUtils.setSuffixProperties(suffixes_Layer);
+									prop = propertiesUtils.loadProperties(file, true);
 									if (null != prop) {
 										file = fileUtils.getFile(fileList, prop.getProperty(imagePath));
 										if (null == file) {
@@ -2359,9 +2381,9 @@ public class PixelShaderUI extends JFrame {
 								}
 							}
 						}
-					} else if (fileName.endsWith(fileSuffixes_Layer)) {
-						fileUtils.setSuffixProperties(fileSuffixes_Layer);
-						prop = fileUtils.loadProperties(file);
+					} else if (fileName.endsWith(suffixes_Layer)) {
+						propertiesUtils.setSuffixProperties(suffixes_Layer);
+						prop = propertiesUtils.loadProperties(file, true);
 						if (null != prop) {
 							file = fileUtils.getFile(fileList, prop.getProperty(imagePath));
 							if (null == file) {
