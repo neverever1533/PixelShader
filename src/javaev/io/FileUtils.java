@@ -2,18 +2,12 @@ package javaev.io;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 
 import java.nio.charset.Charset;
 
-import java.util.InvalidPropertiesFormatException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import cn.imaginary.toolkit.image.ImageLayer;
 
@@ -33,11 +27,7 @@ public class FileUtils {
 		}
 	}
 
-	private String encoding_Default = "utf-8";
-
 	private String[] suffixArray;
-
-	private String suffixProperties = ".xml";
 
 	private FileUtils() {
 	}
@@ -110,12 +100,16 @@ public class FileUtils {
 		return null;
 	}
 
+	public File getFile(File file, String suffix) {
+		return getFile(file, null, suffix);
+	}
+
 	public File getFile(File file, Object name, String suffix) {
 		return getFile(file, name, false, suffix);
 	}
 
-	public File getFile(File file, String suffix) {
-		return getFile(file, null, suffix);
+	public File getFileReplace(File file, Object name, String suffix) {
+		return getFile(file, name, true, suffix);
 	}
 
 	public File getFile(List<File> list, String fileName) {
@@ -214,10 +208,6 @@ public class FileUtils {
 		return toStringArray(fileArray, false);
 	}
 
-	public File getFileReplace(File file, Object name, String suffix) {
-		return getFile(file, name, true, suffix);
-	}
-
 	public ImageLayer getImageLayer(List<ImageLayer> list, File file) {
 		if (null != file) {
 			return getImageLayer(list, file.getPath());
@@ -282,10 +272,6 @@ public class FileUtils {
 		return suffixArray;
 	}
 
-	public String getSuffixProperties() {
-		return suffixProperties;
-	}
-
 	public boolean isDirectoryArrayOnly(File[] fileArray) {
 		return checkFileArray(fileArray, true);
 	}
@@ -294,67 +280,8 @@ public class FileUtils {
 		return checkFileArray(fileArray, false);
 	}
 
-	public boolean isFileProperties(File file) {
-		String name = file.getName().toLowerCase();
-		if (name.endsWith(suffixProperties)) {
-			return true;
-		}
-		return false;
-	}
-
-	public Properties loadProperties(File file) {
-		if (null != file) {
-			try {
-				Properties properties = new Properties();
-				FileInputStream fileInputStream = new FileInputStream(file);
-				if (isFileProperties(file)) {
-					properties.loadFromXML(fileInputStream);
-				} else {
-					properties.load(fileInputStream);
-				}
-				fileInputStream.close();
-				return properties;
-			} catch (InvalidPropertiesFormatException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-
 	public void setSuffixArray(String[] array) {
 		suffixArray = array;
-	}
-
-	public void setSuffixProperties(String suffix) {
-		if (null != suffix) {
-			suffixProperties = suffix.toLowerCase();
-		}
-	}
-
-	public void storeProperties(File file, Properties properties, String comment, String encoding) {
-		if (null == file || null == properties) {
-			return;
-		}
-		if (null == encoding || !Charset.isSupported(encoding)) {
-			encoding = encoding_Default;
-		}
-		try {
-			if (!file.exists()) {
-				if (file.isDirectory()) {
-					file = getFile(file, suffixProperties);
-				}
-				file.createNewFile();
-			}
-			FileOutputStream fileOutputStream = new FileOutputStream(file);
-			properties.storeToXML(fileOutputStream, comment, encoding);
-			fileOutputStream.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private String[] toStringArray(File[] fileArray, boolean isFileName) {
