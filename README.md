@@ -77,7 +77,7 @@ ps.此看板娘psd小人儿作者：【脆皮酥炸蜜汁金黄炸鸡腿】
 
 ![pb-4](https://user-images.githubusercontent.com/52105884/168302933-9ad8684f-0e3a-4996-b27b-8556a419376a.PNG)
 
-![pb-5](https://user-images.githubusercontent.com/52105884/168302999-437aaa9a-912e-4368-9e03-8f0bafa2f924.PNG)
+![pb-0](https://user-images.githubusercontent.com/52105884/168317591-067db83f-9706-4d00-8fd9-71f708273d2d.PNG)
 
  2. 图帧编辑（进度60%）
 
