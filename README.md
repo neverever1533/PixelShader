@@ -47,6 +47,16 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
 
 ---------分割线---------
 
+项目预览：
+
+![pb-1](https://user-images.githubusercontent.com/52105884/168308808-2872eb73-5346-42a4-bf1a-355ba6244089.PNG)
+
+![pb-0](https://user-images.githubusercontent.com/52105884/168314542-97da3def-8ab2-4122-9a90-732a1fbc6f8f.PNG)
+
+ps.此看板娘psd小人儿作者：【脆皮酥炸蜜汁金黄炸鸡腿】
+
+---------分割线---------
+
 项目计划：
 
 计划五：
@@ -98,10 +108,6 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
    1.1.2 鼠标修改坐标、旋转、修改锚点（进度50%）
 
   2.2 图片编辑（进度30%）
- 
-![cup](https://user-images.githubusercontent.com/52105884/162568214-db6f3c9c-c8b8-4956-8f59-65f54a5bb67c.PNG)
-
-![test](https://user-images.githubusercontent.com/52105884/162568223-bdf1b5f6-49ca-468a-b758-8b14ab196a1b.png)
  
 ......待编辑......
 
