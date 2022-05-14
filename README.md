@@ -49,9 +49,9 @@ start jre\bin\javaw -jar TestUI_for_JavaSE-1.8.jar
 
 项目预览：
 
-![pb-1](https://user-images.githubusercontent.com/52105884/168308808-2872eb73-5346-42a4-bf1a-355ba6244089.PNG)
+![gev-3](https://user-images.githubusercontent.com/52105884/168413149-8be79fb4-1d71-4828-a9a4-51e598800b80.png)
 
-![pb](https://user-images.githubusercontent.com/52105884/168317856-f617afc1-c057-477a-8684-2d4a3e1784d5.png)
+![gev-4](https://user-images.githubusercontent.com/52105884/168413134-d9603bc9-ca59-4b30-ab09-0280982316c2.png)
 
 ps.此看板娘psd小人儿作者：【脆皮酥炸蜜汁金黄炸鸡腿】
 
@@ -75,9 +75,9 @@ ps.此看板娘psd小人儿作者：【脆皮酥炸蜜汁金黄炸鸡腿】
  
   父子关系已由树状JTree接管，图层分组后可同步位移或相对旋转；
 
-![pb-4](https://user-images.githubusercontent.com/52105884/168302933-9ad8684f-0e3a-4996-b27b-8556a419376a.PNG)
+![gev-1](https://user-images.githubusercontent.com/52105884/168413167-28d649d4-deba-4793-9479-4a59514c4af0.png)
 
-![pb-0](https://user-images.githubusercontent.com/52105884/168317591-067db83f-9706-4d00-8fd9-71f708273d2d.PNG)
+![gev-2](https://user-images.githubusercontent.com/52105884/168413170-40eff01b-3de3-4079-be10-04e37d6368fd.png)
 
  2. 图帧编辑（进度60%）
 
