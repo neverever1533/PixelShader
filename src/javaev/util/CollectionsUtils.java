@@ -5,13 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CollectionsUtils {
-	public static <T> String toString(List<T> list) {
+	public static String toString(List<Object> list) {
 		if (null != list) {
 			StringBuffer sbuf = new StringBuffer();
 			sbuf.append("[");
 			int index = 0;
 			Object object;
-			for (Iterator<T> iterator = list.iterator(); iterator.hasNext();) {
+			for (Iterator<Object> iterator = list.iterator(); iterator.hasNext();) {
 				object = iterator.next();
 				if (index != 0) {
 					sbuf.append(", ");
@@ -29,7 +29,7 @@ public class CollectionsUtils {
 		return null;
 	}
 
-	public <T> void add(List<T> list, T object) {
+	public void add(List<Object> list, Object object) {
 		if (null != list) {
 			if (Collections.frequency(list, object) == 0) {
 				list.add(object);
@@ -43,11 +43,20 @@ public class CollectionsUtils {
 	 * @param <T>  对象类型；
 	 * @param src  含有复数Object的列表；
 	 * @param dest 含有单数Object的列表；
+	 * @return 返回dest；
 	 */
-	public <T> void removeRepetition(List<T> src, List<T> dest) {
+	public void removeRepetition(List<Object> src, List<Object> dest) {
 		if (null != src && null != dest) {
-			for (Iterator<T> iterator = src.iterator(); iterator.hasNext();) {
+			for (Iterator<Object> iterator = src.iterator(); iterator.hasNext();) {
 				add(dest, iterator.next());
+			}
+		}
+	}
+
+	public void toList(List<Object> list, Object[] array) {
+		if (null != list && null != array) {
+			for (int i = 0, iLength = array.length; i < iLength; i++) {
+				add(list, array[i]);
 			}
 		}
 	}
