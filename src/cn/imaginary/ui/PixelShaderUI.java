@@ -6,12 +6,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -55,24 +53,27 @@ import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import cn.imaginary.toolkit.image.ImageLayer;
 import cn.imaginary.toolkit.io.PSDFileReader;
+import cn.imaginary.toolkit.swing.tree.DefaultMutableTreeNodeUtils;
+import cn.imaginary.toolkit.swing.tree.DefaultTreeModelUtils;
 
+import javaev.awt.DimensionUtils;
 import javaev.awt.Graphics2DUtils;
+import javaev.awt.PointUtils;
 
 import javaev.imageio.ImageIOUtils;
 
 import javaev.io.FileUtils;
 
+import javaev.lang.ObjectUtils;
 import javaev.lang.StringUtils;
 
 import javaev.swing.DefaultTreeCellRendererUtils;
 import javaev.swing.JPanelDnD;
 
-import javaev.util.CollectionsUtils;
 import javaev.util.PropertiesUtils;
 
 public class PixelShaderUI extends JFrame {
@@ -89,14 +90,12 @@ public class PixelShaderUI extends JFrame {
 
 	private Color bgColor = Color.black;
 
-	private Dimension canvas;
+	private DimensionUtils canvas;
 
 	private String cardEditor = "editor";
 	private String cardGraphics = "graphics";
-
+	
 	private CardLayout cardLayout;
-
-	private CollectionsUtils collectionsUtils = new CollectionsUtils();
 
 	private String encoding_default = "utf-8";
 
@@ -106,7 +105,7 @@ public class PixelShaderUI extends JFrame {
 	private int fileFilterStyle_Layer = 5;
 	private int fileFilterStyle_Project = 0;
 	private int fileFilterStyle_PS = 2;
-
+	
 	private FileUtils fileUtils = FileUtils.getInstance();
 
 	private Graphics2DUtils graphics2dUtils = new Graphics2DUtils();
@@ -119,11 +118,11 @@ public class PixelShaderUI extends JFrame {
 	private double indexScaledDefault = 0.25;
 	private double indexScaledMax = 2;
 	private double indexScaledMin = 0.25;
-
-	private boolean isChildAdd = false;
+	
 	private boolean isExport = false;
-	private boolean isLayerRotated = false;
+	private boolean isLayerAction = false;
 	private boolean isLocationCenter;
+	private boolean isUpdate;
 
 	private JCheckBox jCheckBoxGravity;
 
@@ -139,8 +138,8 @@ public class PixelShaderUI extends JFrame {
 
 	private JTextField jTextFieldAlpha;
 	private JTextField jTextFieldAnchorX;
-	private JTextField jTextFieldAnchorY;;
-	private JTextField jTextFieldAngle;
+	private JTextField jTextFieldAnchorY;
+	private JTextField jTextFieldAngle;;
 	private JTextField jTextFieldCanvasX;
 	private JTextField jTextFieldCanvasY;
 	private JTextField jTextFieldDepth;
@@ -157,27 +156,39 @@ public class PixelShaderUI extends JFrame {
 
 	private List<ImageLayer> layerListRoot;
 
-	private PropertiesUtils propertiesUtils = new PropertiesUtils();
+	private PointUtils locationMouse;
 
-	public String suffixes_Image = ".png";
-	public String suffixes_Layer = ".pxl";
-	public String suffixes_Project = ".evp";
+	private Properties modelProperties;
+
+	private ObjectUtils objectUtils = new ObjectUtils();
+	
+	private PropertiesUtils propertiesUtils = new PropertiesUtils();
+	
+	private String tag_model = "TreeModel";
+	private String tag_slash = "/";
+	private String tag_suffixes_image = ".png";
+	private String tag_suffixes_layer = ".pxl";
+	private String tag_suffixes_project = ".evp";
 
 	private DefaultTreeCellRendererUtils treeCellRenderer;
 
+	private DefaultTreeModelUtils treeModelUtils = new DefaultTreeModelUtils();
+
+	private DefaultMutableTreeNodeUtils treeNodeUtils = new DefaultMutableTreeNodeUtils();
+
 	public PixelShaderUI() {
 		super();
-		setTitle("PixelShader ver.56.6e0d.a820_alpha by Sev末夜");
+		setTitle("PixelShader ver.61.2e10.b31e_alpha by Sev末夜");
 		initGUI();
 	}
 
-	private void createNewProject() {
+	private void createJTree() {
 		double widthCanvas = 1024;
 		double heightCanvas = 1024;
 		jTextFieldCanvasX.setText(String.valueOf(widthCanvas));
 		jTextFieldCanvasY.setText(String.valueOf(heightCanvas));
 		if (null == canvas) {
-			canvas = new Dimension();
+			canvas = new DimensionUtils();
 		}
 		canvas.setSize(widthCanvas, heightCanvas);
 		imageLayerSelected = null;
@@ -191,6 +202,11 @@ public class PixelShaderUI extends JFrame {
 		modelRoot.reload(treeNodeRoot);
 	}
 
+	private void createNewProject() {
+		warning();
+		createJTree();
+	}
+
 	private void drawImageLayers(JPanel jPanel, List<ImageLayer> imageLayerList) {
 		if (null != imageLayerList) {
 			int widthRoot;
@@ -201,7 +217,7 @@ public class PixelShaderUI extends JFrame {
 			} else {
 				widthRoot = jPanel.getWidth();
 				heightRoot = jPanel.getHeight();
-				canvas = new Dimension();
+				canvas = new DimensionUtils();
 				canvas.setSize(widthRoot, heightRoot);
 			}
 			Graphics g = jPanel.getGraphics();
@@ -226,6 +242,15 @@ public class PixelShaderUI extends JFrame {
 			layerImage = imageRoot;
 			graphics2d.drawRect(0, 0, (int) (widthRoot * indexScaled), (int) (heightRoot * indexScaled));
 			graphics2d.drawString(String.valueOf(indexScaled), 15, 25);
+			if (!isLayerAction && null != locationMouse) {
+				int x = locationMouse.x;
+				int y = locationMouse.y;
+				StringBuffer sbuf = new StringBuffer();
+				sbuf.append(x);
+				sbuf.append(tag_slash);
+				sbuf.append(y);
+				graphics2d.drawString(sbuf.toString(), x, y);
+			}
 			graphics2d.dispose();
 		}
 	}
@@ -235,10 +260,10 @@ public class PixelShaderUI extends JFrame {
 			BufferedImage image = imageLayer.getImage();
 			if (null != image) {
 				AffineTransform xform = new AffineTransform();
-				Point anchor = imageLayer.getAnchor();
+				PointUtils anchor = imageLayer.getAnchor();
 				boolean isGravity = imageLayer.isGravity();
-				Point location = imageLayer.getLocation();
-				Dimension scale = imageLayer.getScale();
+				PointUtils location = imageLayer.getLocation();
+				DimensionUtils scale = imageLayer.getScale();
 				if (isLocationCenter) {
 					int widthRoot = imageRoot.getWidth();
 					int heightRoot = imageRoot.getHeight();
@@ -316,37 +341,51 @@ public class PixelShaderUI extends JFrame {
 	}
 
 	private File getFileLayer(File file) {
-		return fileUtils.getFile(file, suffixes_Layer);
+		return fileUtils.getFile(file, tag_suffixes_layer);
 	}
 
 	private File getFileProject(File file) {
-		return fileUtils.getFile(file, suffixes_Project);
+		return fileUtils.getFile(file, tag_suffixes_project);
 	}
 
 	private String getHelpInfo() {
 		StringBuffer description = new StringBuffer();
 		String ln = StringUtils.Line_Separator;
-		description.append("一、建立父子关系：");
+		description.append("一、 图层列表编辑：");
 		description.append(ln);
-		description.append("1.【鼠标】点击（选中）图层节点，同时按住【Alt】键并鼠标按住拖动子节点（child.png）；");
+		description.append("1. 建立父子关系：");
 		description.append(ln);
-		description.append("2.如上操作并将图层拖向父节点(parent.png)，直到子节点图层加入父节点图层；");
+		description.append("1.1 【鼠标】点击（选中）图层节点，同时按住【Alt】键并鼠标按住拖动子节点（child.png）；");
+		description.append(ln);
+		description.append("1.2 如上操作并将图层拖向父节点(parent.png)，直到子节点图层加入父节点图层；");
 		description.append(ln);
 		description.append("ps：若父节点显示如同文件夹结构，即可展开或关闭则表示关系建立成功。");
 		description.append(ln);
-		description.append("二、解除父子关系：");
+		description.append("2. 解除父子关系：");
 		description.append(ln);
-		description.append("1.【鼠标】点击（选中）图层节点，鼠标按住拖动子节点（child.png）；");
+		description.append("2.1 【鼠标】点击（选中）图层节点，鼠标按住拖动子节点（child.png）；");
 		description.append(ln);
-		description.append("2.如上操作并将图层拖向任意处，即脱离父节点(parent.png)所在行，直到父节点图层其下失去子节点；");
+		description.append("2.2 如上操作并将图层拖向任意处，即脱离父节点(parent.png)所在行，直到父节点图层其下失去子节点；");
 		description.append(ln);
 		description.append("ps：按住鼠标并拖动节点可解除父子关系，同时也可以任意更换当前节点的位置。");
 		description.append(ln);
-		description.append("三、删除图层：");
+		description.append("3. 删除图层：");
 		description.append(ln);
-		description.append("1.【鼠标】点击（选中）图层节点，右键点击此节点（child.png）；");
+		description.append("3.1 【鼠标】点击（选中）图层节点，右键点击此节点（child.png）；");
 		description.append(ln);
 		description.append("ps：删除图层仅移除树状列表节点内容，且所有操作不改动原始图形文件。");
+		description.append(ln);
+		description.append("二、 图层变换：");
+		description.append(ln);
+		description.append("1. 开启编辑：");
+		description.append(ln);
+		description.append("1.1 点击画布左侧工具栏【+】按钮，进入图层编辑状态（图层可进行拖动、旋转等操作）；");
+		description.append(ln);
+		description.append("2. 开启预览：");
+		description.append(ln);
+		description.append("2.1 点击画布左侧工具栏【-】按钮，即退出编辑并进入预览状态；");
+		description.append(ln);
+		description.append("ps：鼠标悬停按钮之上可显示按钮功能说明。");
 		return description.toString();
 	}
 
@@ -363,35 +402,6 @@ public class PixelShaderUI extends JFrame {
 		return description.toString();
 	}
 
-	private DefaultMutableTreeNode getTreeNode(JTree jTree, String object) {
-		if (null != jTree) {
-			DefaultTreeModel modelRoot = (DefaultTreeModel) jTree.getModel();
-			if (null != modelRoot) {
-				DefaultMutableTreeNode treeNodeRoot = (DefaultMutableTreeNode) modelRoot.getRoot();
-				if (null != treeNodeRoot) {
-					DefaultMutableTreeNode treeNode;
-					Object objectTreeNode;
-					String path;
-					for (@SuppressWarnings("unchecked")
-					Enumeration<TreeNode> treeNodeEnumeration = treeNodeRoot.preorderEnumeration(); treeNodeEnumeration
-							.hasMoreElements();) {
-						treeNode = (DefaultMutableTreeNode) treeNodeEnumeration.nextElement();
-						if (null != treeNode) {
-							objectTreeNode = treeNode.getUserObject();
-							if (null != objectTreeNode && objectTreeNode instanceof String) {
-								path = (String) objectTreeNode;
-								if (object.endsWith(path)) {
-									return treeNode;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
-
 	private String getVersionInfo() {
 		StringBuffer description = new StringBuffer();
 		String ln = StringUtils.Line_Separator;
@@ -399,7 +409,11 @@ public class PixelShaderUI extends JFrame {
 		description.append(ln);
 		description.append("author:Sev末夜");
 		description.append(ln);
-		description.append("ver.56.6e0d.a820_alpha");
+		description.append("ver.61.2e10.b31e_alpha");
+		description.append(ln);
+		description.append("new:工程文件存储方式优化；");
+		description.append(ln);
+		description.append("ver.52.1e0d.a820_alpha");
 		description.append(ln);
 		description.append("new:分组图层变换同步优化，图层编辑树状结构存储为工程；");
 		description.append(ln);
@@ -485,7 +499,10 @@ public class PixelShaderUI extends JFrame {
 							@Override
 							public void actionPerformed(ActionEvent e) {
 //								System.out.println(jMenuItem.getText());
-								loadLayer(Arrays.asList(openFiles(fileFilterStyle_Image)));
+								File[] array = openFiles(fileFilterStyle_Image);
+								if (null != array) {
+									loadLayer(Arrays.asList(array));
+								}
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -501,7 +518,10 @@ public class PixelShaderUI extends JFrame {
 							@Override
 							public void actionPerformed(ActionEvent e) {
 //								System.out.println(jMenuItem.getText());
-								loadLayer(Arrays.asList(openFiles(fileFilterStyle_Layer)));
+								File[] array = openFiles(fileFilterStyle_Layer);
+								if (null != array) {
+									loadLayer(Arrays.asList(array));
+								}
 //								drawResources();
 							}
 						};
@@ -518,7 +538,10 @@ public class PixelShaderUI extends JFrame {
 							@Override
 							public void actionPerformed(ActionEvent e) {
 //								System.out.println(jMenuItem.getText());
-								loadLayer(Arrays.asList(openFiles(fileFilterStyle_Project)));
+								File[] array = openFiles(fileFilterStyle_Project);
+								if (null != array) {
+									loadLayer(Arrays.asList(array));
+								}
 //								drawResources();
 							}
 						};
@@ -650,24 +673,27 @@ public class PixelShaderUI extends JFrame {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							String description = "打开工程将销毁现有数据！";
-							int messageStyle = JOptionPane.showConfirmDialog(null, description);// yes=0;no=1;cancel=2
-							if (messageStyle == 0) {
-								if (null != layerListRoot && layerListRoot.size() != 0) {
-									storeResources(openFiles(fileFilterStyle_Project), 0);
-									description = "操作完成！";
-								} else {
-									description = "项目为空！";
-								}
-								JOptionPane.showMessageDialog(null, description);
-							} else if (messageStyle == 1) {
-								description = "原有项目未保存！";
-								JOptionPane.showMessageDialog(null, description);
-							} else if (messageStyle == 2) {
-								return;
-							}
+//							String description = "打开工程将销毁现有数据！";
+//							int messageStyle = JOptionPane.showConfirmDialog(null, description);// yes=0;no=1;cancel=2
+//							if (messageStyle == 0) {
+//								if (null != layerListRoot && layerListRoot.size() != 0) {
+//									storeResources(openFiles(fileFilterStyle_Project), 0);
+//									description = "操作完成！";
+//								} else {
+//									description = "项目为空！";
+//								}
+//								JOptionPane.showMessageDialog(null, description);
+//							} else if (messageStyle == 1) {
+//								description = "原有项目未保存！";
+//								JOptionPane.showMessageDialog(null, description);
+//							} else if (messageStyle == 2) {
+//								return;
+//							}
 							createNewProject();
-							loadLayer(Arrays.asList(openFiles(fileFilterStyle_Project)));
+							File[] array = openFiles(fileFilterStyle_Project);
+							if (null != array) {
+								loadLayer(Arrays.asList(array));
+							}
 						}
 					};
 					jMenuItem.addActionListener(al);
@@ -705,6 +731,7 @@ public class PixelShaderUI extends JFrame {
 						@Override
 						public void actionPerformed(ActionEvent e) {
 //							System.out.println(jMenuItem.getText());
+							warning();
 							System.exit(0);
 						}
 					};
@@ -865,11 +892,12 @@ public class PixelShaderUI extends JFrame {
 							{
 								JButton jButton = new JButton();
 								jButton.setText("确定");
+								jButton.setEnabled(false);
 								ActionListener al = new ActionListener() {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											imageLayerSelected.setSize(toDouble(jTextFieldSizeWidth),
 													toDouble(jTextFieldSizeHeight));
 											drawResources();
@@ -879,10 +907,6 @@ public class PixelShaderUI extends JFrame {
 								jButton.addActionListener(al);
 								jToolBar.add(jButton);
 							}
-							jPanel.add(jToolBar);
-						}
-						{
-							JToolBar jToolBar = new JToolBar();
 							{
 								JLabel jLabel = new JLabel();
 								jLabel.setText("缩放：");
@@ -902,7 +926,7 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											double scaled = toDouble(jTextFieldScale);
 											imageLayerSelected.scale(scaled, scaled);
 											drawResources();
@@ -935,10 +959,10 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											double rotate = toDouble(jTextFieldAngle);
 											double rotateLayer = imageLayerSelected.getRotated();
-											Point point = imageLayerSelected.getLocation();
+											PointUtils point = imageLayerSelected.getLocation();
 											int x = 0;
 											int y = 0;
 											if (null != point) {
@@ -997,9 +1021,13 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
-											imageLayerSelected.setAnchor(toDouble(jTextFieldAnchorX),
-													toDouble(jTextFieldAnchorY));
+										if (null != imageLayerSelected && isLayerAction) {
+											PointUtils location = imageLayerSelected.getLocation();
+											if (null != location) {
+												imageLayerSelected.setAnchor(
+														toDouble(jTextFieldAnchorX) - location.getX(),
+														toDouble(jTextFieldAnchorY) - location.getY());
+											}
 											if (isLocationCenter) {
 												isLocationCenter = false;
 											}
@@ -1036,7 +1064,7 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											String string = toStringDigital(jTextFieldAlpha);
 											if (null != string) {
 												imageLayerSelected.setAlpha(Float.valueOf(string));
@@ -1071,7 +1099,7 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											String string = toStringDigital(jTextFieldDepth);
 											if (null != string) {
 												int depthNew = Integer.valueOf(string);
@@ -1100,11 +1128,14 @@ public class PixelShaderUI extends JFrame {
 							{
 								JButton jButton = new JButton();
 								jButton.setText("+");
-								jButton.setToolTipText("画图");
+								jButton.setToolTipText("编辑");
 								ActionListener al = new ActionListener() {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
+										if (!isLayerAction) {
+											isLayerAction = true;
+										}
 									}
 								};
 								jButton.addActionListener(al);
@@ -1113,11 +1144,14 @@ public class PixelShaderUI extends JFrame {
 							{
 								JButton jButton = new JButton();
 								jButton.setText("-");
-								jButton.setToolTipText("橡皮");
+								jButton.setToolTipText("预览");
 								ActionListener al = new ActionListener() {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
+										if (isLayerAction) {
+											isLayerAction = false;
+										}
 									}
 								};
 								jButton.addActionListener(al);
@@ -1143,29 +1177,30 @@ public class PixelShaderUI extends JFrame {
 						Dimension dimension = new Dimension(width, height);
 						jPanelGraphics.setSize(dimension);
 //					drawBackgroundStyle(jPanel);
-						KeyListener kl = new KeyListener() {
-
-							@Override
-							public void keyPressed(KeyEvent e) {
-								if (e.getKeyCode() == KeyEvent.VK_ALT) {
-									isLayerRotated = true;
-								} else {
-									isLayerRotated = false;
-								}
-							}
-
-							@Override
-							public void keyReleased(KeyEvent e) {
-								if (isLayerRotated) {
-									isLayerRotated = false;
-								}
-							}
-
-							@Override
-							public void keyTyped(KeyEvent e) {
-							}
-						};
-						jPanelGraphics.addKeyListener(kl);
+//						KeyListener kl = new KeyListener() {
+//
+//							@Override
+//							public void keyPressed(KeyEvent e) {
+////								if (e.getKeyCode() == KeyEvent.VK_ALT) {
+//								if (e.isAltDown()) {
+//									isLayerAction = true;
+//								} else {
+//									isLayerAction = false;
+//								}
+//							}
+//
+//							@Override
+//							public void keyReleased(KeyEvent e) {
+//								if (isLayerAction) {
+//									isLayerAction = false;
+//								}
+//							}
+//
+//							@Override
+//							public void keyTyped(KeyEvent e) {
+//							}
+//						};
+//						jPanelGraphics.addKeyListener(kl);
 						MouseWheelListener mwl = new MouseWheelListener() {
 
 							@Override
@@ -1206,6 +1241,7 @@ public class PixelShaderUI extends JFrame {
 							private double xOld;
 							private double yNew;
 							private double yOld;
+//							private String tag_slash = "/";
 
 							@Override
 							public void mouseClicked(MouseEvent e) {
@@ -1223,41 +1259,59 @@ public class PixelShaderUI extends JFrame {
 							public void mousePressed(MouseEvent e) {
 								xOld = e.getX();
 								yOld = e.getY();
-								if (e.getButton() == MouseEvent.BUTTON1) {
-									if (null != imageLayerSelected) {
-									}
-								} else if (e.getButton() == MouseEvent.BUTTON3) {
-									if (null != imageLayerSelected) {
-									}
-								}
 							}
 
 							@Override
 							public void mouseReleased(MouseEvent e) {
 								xNew = e.getX();
 								yNew = e.getY();
-								if (null != imageLayerSelected) {
-									Point location = imageLayerSelected.getLocation();
-									double x;
-									double y;
-									double tx = xNew - xOld;
-									double ty = yNew - yOld;
-									if (null != location) {
-										x = location.getX() + tx;
-										y = location.getY() + ty;
+								if (e.getButton() == MouseEvent.BUTTON1) {
+									if (isLayerAction) {
+										if (null != imageLayerSelected && isLayerAction) {
+											PointUtils location = imageLayerSelected.getLocation();
+											double x;
+											double y;
+											double tx = xNew - xOld;
+											double ty = yNew - yOld;
+											if (null != location) {
+												x = location.getX() + tx;
+												y = location.getY() + ty;
+											} else {
+												x = tx;
+												y = ty;
+											}
+											layerTransform(imageLayerSelected, x, y, imageLayerSelected.getRotated());
+											setImageLayerInfo(imageLayerSelected);
+											if (isLocationCenter) {
+												isLocationCenter = false;
+											}
+											if (jCheckBoxMenuItemCenter.isSelected()) {
+												jCheckBoxMenuItemCenter.setSelected(false);
+											}
+											drawResources();
+										}
+										if (null != locationMouse) {
+											locationMouse = null;
+										}
 									} else {
-										x = tx;
-										y = ty;
+										if (null == locationMouse) {
+											locationMouse = new PointUtils();
+										}
+										locationMouse.setLocation(e.getX(), e.getY());
+										drawResources();
 									}
-									layerTransform(imageLayerSelected, x, y, imageLayerSelected.getRotated());
-									setImageLayerInfo(imageLayerSelected);
-									if (isLocationCenter) {
-										isLocationCenter = false;
-									}
-									if (jCheckBoxMenuItemCenter.isSelected()) {
-										jCheckBoxMenuItemCenter.setSelected(false);
-									}
-									drawResources();
+								} else if (e.getButton() == MouseEvent.BUTTON3) {
+//									if (null != imageLayerSelected) {
+//										PointUtils location = imageLayerSelected.getLocation();
+//										if(null!= location) {
+//											double ty = yNew - yOld;
+//											double x = location.getX();
+//											double y = location.getY();
+//											layerTransform(imageLayerSelected, x, y, imageLayerSelected.getRotated() + ty * 10);
+//											setImageLayerInfo(imageLayerSelected);
+//											drawResources();
+//										}
+//									}
 								}
 							}
 						};
@@ -1301,29 +1355,6 @@ public class PixelShaderUI extends JFrame {
 										jTreeRoot.setModel(treeModelRoot);
 										treeCellRenderer = new DefaultTreeCellRendererUtils();
 										jTreeRoot.setCellRenderer(treeCellRenderer);
-										KeyListener kl = new KeyListener() {
-
-											@Override
-											public void keyPressed(KeyEvent e) {
-												if (e.getKeyCode() == KeyEvent.VK_ALT) {
-													isChildAdd = true;
-												} else {
-													isChildAdd = false;
-												}
-											}
-
-											@Override
-											public void keyReleased(KeyEvent e) {
-												if (isChildAdd) {
-													isChildAdd = false;
-												}
-											}
-
-											@Override
-											public void keyTyped(KeyEvent e) {
-											}
-										};
-										jTreeRoot.addKeyListener(kl);
 										MouseMotionListener mml = new MouseMotionListener() {
 
 											private int rowDragged;
@@ -1339,7 +1370,7 @@ public class PixelShaderUI extends JFrame {
 											public void mouseMoved(MouseEvent e) {
 												int selRow = jTreeRoot.getRowForLocation(e.getX(), e.getY());
 												rowMoved = selRow;
-												myTreeNodeMoveTo(selRow, isChildAdd);
+												myTreeNodeMoveTo(selRow, isLayerAction);
 											}
 
 											private void myTreeNodeMoveTo(int selRow, boolean todo) {
@@ -1418,30 +1449,7 @@ public class PixelShaderUI extends JFrame {
 												if (null == parent) {
 													return;
 												}
-												DefaultTreeModel dtm = (DefaultTreeModel) jTreeRoot.getModel();
-												dtm.removeNodeFromParent(treeNodeSelected);
-												Object object;
-												String pathName;
-												if (treeNodeSelected.getChildCount() != 0) {
-													DefaultMutableTreeNode treeNode;
-													for (@SuppressWarnings("unchecked")
-													Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNodeSelected
-															.children(); treeNodeEnumeration.hasMoreElements();) {
-														treeNode = treeNodeEnumeration.nextElement();
-														object = treeNode.getUserObject();
-														if (null != object) {
-															pathName = (String) object;
-															layerListRoot.remove(
-																	fileUtils.getImageLayer(layerListRoot, pathName));
-														}
-													}
-												}
-												object = treeNodeSelected.getUserObject();
-												if (null != object && object instanceof String) {
-													pathName = (String) object;
-													layerListRoot
-															.remove(fileUtils.getImageLayer(layerListRoot, pathName));
-												}
+												removeNode(treeNodeSelected);
 												if (layerListRoot.isEmpty()) {
 													imageLayerSelected = null;
 													setImageLayerInfo(null);
@@ -1529,7 +1537,7 @@ public class PixelShaderUI extends JFrame {
 											double widthCanvas = toDouble(jTextFieldCanvasX);
 											double heightCanvas = toDouble(jTextFieldCanvasY);
 											if (widthCanvas > 0 && heightCanvas > 0) {
-												canvas = new Dimension();
+												canvas = new DimensionUtils();
 												canvas.setSize(widthCanvas, heightCanvas);
 											}
 											drawResources();
@@ -1614,7 +1622,7 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											if (jCheckBoxVisible.isSelected()) {
 												imageLayerSelected.isVisible(true);
 											} else {
@@ -1655,7 +1663,7 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											if (jCheckBoxGravity.isSelected()) {
 												imageLayerSelected.isGravity(true);
 											} else {
@@ -1708,7 +1716,7 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
+										if (null != imageLayerSelected && isLayerAction) {
 											double x = toDouble(jTextFieldLocationX);
 											double y = toDouble(jTextFieldLocationY);
 											layerTransform(imageLayerSelected, x, y, imageLayerSelected.getRotated());
@@ -1732,8 +1740,8 @@ public class PixelShaderUI extends JFrame {
 
 									@Override
 									public void actionPerformed(ActionEvent e) {
-										if (null != imageLayerSelected) {
-											Dimension size = imageLayerSelected.getSize();
+										if (null != imageLayerSelected && isLayerAction) {
+											DimensionUtils size = imageLayerSelected.getSize();
 											if (null != size && null != canvas) {
 												double x = (canvas.getWidth() - size.getWidth()) / 2;
 												double y = (canvas.getHeight() - size.getHeight()) / 2;
@@ -1798,8 +1806,7 @@ public class PixelShaderUI extends JFrame {
 			String imagePath;
 			Properties prop;
 			PropertiesUtils pu = new PropertiesUtils();
-			String commentImage = "Images";
-//			String encoding = "utf-8";
+			String commentLayer = "ImageLayer";
 			for (Iterator<ImageLayer> iterator = layerList.iterator(); iterator.hasNext();) {
 				layer = iterator.next();
 				if (null != layer) {
@@ -1813,7 +1820,8 @@ public class PixelShaderUI extends JFrame {
 								imageExport(layer.getImage(), imageFile);
 							}
 							propFile = getFileLayer(imageFile);
-							propertiesUtils.storeProperties(prop, true, propFile, commentImage, encoding_default);
+							propertiesUtils.storePropertiesXml(prop, propFile, tag_suffixes_layer, commentLayer,
+									encoding_default);
 							if (isExportProject) {
 								properties.put(imageFile.getName(), propFile.getAbsolutePath());
 							}
@@ -1822,8 +1830,11 @@ public class PixelShaderUI extends JFrame {
 				}
 			}
 			if (null != file && isExportProject) {
-				String commentLayer = "PixelShader ImageLayer";
-				propertiesUtils.storeProperties(properties, true, getFileProject(file), commentLayer, encoding_default);
+				String commentProject = "PixelShader Project";
+				prop = treeModelUtils.storeNode((DefaultTreeModel) jTreeRoot.getModel());
+				properties.put(tag_model, prop);
+				propertiesUtils.storePropertiesXml(properties, getFileProject(file), tag_suffixes_project,
+						commentProject, encoding_default);
 			}
 		}
 	}
@@ -1831,7 +1842,7 @@ public class PixelShaderUI extends JFrame {
 	private void layerTransform(ImageLayer imageLayer, double x, double y, double rotate) {
 		if (null != imageLayer) {
 			int index = layerListRoot.indexOf(imageLayer);
-			Point location = imageLayer.getLocation();
+			PointUtils location = imageLayer.getLocation();
 			double rateX = 0;
 			double rateY = 0;
 			if (null != location) {
@@ -1844,8 +1855,8 @@ public class PixelShaderUI extends JFrame {
 				imageLayer.setLocation(x, y);
 			}
 			location = imageLayer.getLocation();
-			Point root = imageLayer.getRoot();
-			Point anchor = imageLayer.getAnchor();
+			PointUtils root = imageLayer.getRoot();
+			PointUtils anchor = imageLayer.getAnchor();
 			if (null != root && null != anchor && !anchor.equals(root)) {
 				imageLayer.setAnchor(root);
 			}
@@ -1872,7 +1883,7 @@ public class PixelShaderUI extends JFrame {
 			double yAnchor) {
 		if (null != layer) {
 			int index;
-			Point locationChild = layer.getLocation();
+			PointUtils locationChild = layer.getLocation();
 			if (rateX != 0 || rateY != 0) {
 				double xc;
 				double yc;
@@ -1887,7 +1898,7 @@ public class PixelShaderUI extends JFrame {
 			}
 			locationChild = layer.getLocation();
 			if (null != locationChild && rateRotate != 0) {
-				Point anchorChild = layer.getAnchor();
+				PointUtils anchorChild = layer.getAnchor();
 				if (null != anchorChild) {
 					layer.setAnchor(xAnchor - locationChild.getX(), yAnchor - locationChild.getY());
 				}
@@ -1905,29 +1916,33 @@ public class PixelShaderUI extends JFrame {
 		if (null != imageLayer) {
 			String imagePath = imageLayer.getImagePath();
 			if (null != imagePath) {
-				DefaultMutableTreeNode treeNode = getTreeNode(jTreeRoot, imagePath);
-				if (null != treeNode) {
-					int count = treeNode.getChildCount();
-					if (count <= 0) {
-						return;
-					}
-					DefaultMutableTreeNode treeNodeChild;
-					Object object;
-					String fileLayerName;
-					ImageLayer layer;
-					for (@SuppressWarnings("unchecked")
-					Enumeration<TreeNode> treeNodeEnumeration = treeNode.children(); treeNodeEnumeration
-							.hasMoreElements();) {
-						treeNodeChild = (DefaultMutableTreeNode) treeNodeEnumeration.nextElement();
-						if (null != treeNodeChild) {
-							object = treeNodeChild.getUserObject();
-							if (null != object && object instanceof String) {
-								fileLayerName = (String) object;
-								layer = fileUtils.getImageLayer(layerListRoot, fileLayerName);
-								if (treeNodeChild.getChildCount() != 0) {
-									layerTransformChilds(layer, rateX, rateY, rateRotate, xAnchor, yAnchor);
+				DefaultTreeModel modelRoot = (DefaultTreeModel) jTreeRoot.getModel();
+				if (null != modelRoot) {
+					DefaultMutableTreeNode treeNodeRoot = (DefaultMutableTreeNode) modelRoot.getRoot();
+					Object object = new File(imagePath).getName();
+					DefaultMutableTreeNode treeNode = treeNodeUtils.getTreeNode(treeNodeRoot, object);
+					if (null != treeNode) {
+						int count = treeNode.getChildCount();
+						if (count <= 0) {
+							return;
+						}
+						DefaultMutableTreeNode treeNodeChild;
+						String fileLayerName;
+						ImageLayer layer;
+						for (@SuppressWarnings("unchecked")
+						Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNode
+								.children(); treeNodeEnumeration.hasMoreElements();) {
+							treeNodeChild = treeNodeEnumeration.nextElement();
+							if (null != treeNodeChild) {
+								object = treeNodeChild.getUserObject();
+								if (null != object && object instanceof String) {
+									fileLayerName = (String) object;
+									layer = fileUtils.getImageLayer(layerListRoot, fileLayerName);
+									if (treeNodeChild.getChildCount() != 0) {
+										layerTransformChilds(layer, rateX, rateY, rateRotate, xAnchor, yAnchor);
+									}
+									layerTransformChild(layer, rateX, rateY, rateRotate, xAnchor, yAnchor);
 								}
-								layerTransformChild(layer, rateX, rateY, rateRotate, xAnchor, yAnchor);
 							}
 						}
 					}
@@ -1939,7 +1954,7 @@ public class PixelShaderUI extends JFrame {
 	private void loadLayer(List<File> fileList) {
 		if (null != fileList) {
 			layerListRoot = updateListLayer(layerListRoot, fileList);
-			updataGraphics();
+			updateGraphics();
 		}
 	}
 
@@ -1950,10 +1965,10 @@ public class PixelShaderUI extends JFrame {
 //			List<ImageLayer> layerList = new LinkedList<>();
 			for (int i = 0, iLength = array.length; i < iLength; i++) {
 				layerList = psdFileReader.read(array[i], layerList);
-				collectionsUtils.removeRepetition(layerListRoot, layerList);
-				layerListRoot = layerList;
 			}
-			updataGraphics();
+			removeRepetition(layerListRoot, layerList);
+			layerListRoot = layerList;
+			updateGraphics();
 		}
 	}
 
@@ -1983,6 +1998,50 @@ public class PixelShaderUI extends JFrame {
 		return fileArray;
 	}
 
+	private void removeNode(DefaultMutableTreeNode treeNode) {
+		if (null != treeNode && null != layerListRoot) {
+			DefaultTreeModel modelRoot = (DefaultTreeModel) jTreeRoot.getModel();
+			modelRoot.removeNodeFromParent(treeNode);
+			String pathName;
+			Object object = treeNode.getUserObject();
+			if (null != object && object instanceof String) {
+				pathName = (String) object;
+				layerListRoot.remove(fileUtils.getImageLayer(layerListRoot, pathName));
+			}
+			if (treeNode.getChildCount() != 0) {
+				DefaultMutableTreeNode node;
+				for (@SuppressWarnings("unchecked")
+//			Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNodeSelected
+//			.children(); treeNodeEnumeration.hasMoreElements();) {
+				Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNode
+						.preorderEnumeration(); treeNodeEnumeration.hasMoreElements();) {
+					node = treeNodeEnumeration.nextElement();
+					object = node.getUserObject();
+					if (null != object) {
+						pathName = (String) object;
+						layerListRoot.remove(fileUtils.getImageLayer(layerListRoot, pathName));
+					}
+				}
+			}
+		}
+	}
+
+	private void removeRepetition(List<ImageLayer> src, List<ImageLayer> dest) {
+		if (null != src && null != dest) {
+			ImageLayer layer;
+			Object path;
+			for (Iterator<ImageLayer> iterator = src.iterator(); iterator.hasNext();) {
+				layer = iterator.next();
+				if (null != layer) {
+					path = layer.getImagePath();
+					if (dest.indexOf(path) == -1) {
+						dest.add(layer);
+					}
+				}
+			}
+		}
+	}
+
 	private void setImageLayerInfo(ImageLayer imageLayer) {
 		String locationX;
 		String locationY;
@@ -1998,7 +2057,7 @@ public class PixelShaderUI extends JFrame {
 		String canvasY;
 		String gravity;
 		if (null != imageLayer) {
-			Point location = imageLayer.getLocation();
+			PointUtils location = imageLayer.getLocation();
 			double x;
 			double y;
 			if (null != location) {
@@ -2010,7 +2069,7 @@ public class PixelShaderUI extends JFrame {
 			}
 			locationX = String.valueOf(x);
 			locationY = String.valueOf(y);
-			Dimension size = imageLayer.getSize();
+			DimensionUtils size = imageLayer.getSize();
 			double w;
 			double h;
 			if (null != size) {
@@ -2023,16 +2082,16 @@ public class PixelShaderUI extends JFrame {
 			width = String.valueOf(w);
 			height = String.valueOf(h);
 			double s = 1;
-			Dimension scale = imageLayer.getScale();
+			DimensionUtils scale = imageLayer.getScale();
 			if (null != scale) {
 				s = Math.max(scale.getWidth(), scale.getHeight());
 			}
 			scaleMax = String.valueOf(s);
 			angle = String.valueOf(imageLayer.getRotated());
-			Point anchor = imageLayer.getAnchor();
+			PointUtils anchor = imageLayer.getAnchor();
 			if (null != anchor) {
-				anchorX = String.valueOf(anchor.getX());
-				anchorY = String.valueOf(anchor.getY());
+				anchorX = String.valueOf(anchor.getX() + x);
+				anchorY = String.valueOf(anchor.getY() + y);
 			}
 			if (imageLayer.isVisible()) {
 				jCheckBoxVisible.setSelected(true);
@@ -2207,7 +2266,7 @@ public class PixelShaderUI extends JFrame {
 			sbuf.append(calendar.get(Calendar.MINUTE));
 			sbuf.append(calendar.get(Calendar.SECOND));
 			sbuf.append(calendar.get(Calendar.MILLISECOND));
-			sbuf.append(suffixes_Image);
+			sbuf.append(tag_suffixes_image);
 			fileName = sbuf.toString();
 			tempFile = new File(dir, fileName);
 			if (null != layerImage) {
@@ -2266,16 +2325,25 @@ public class PixelShaderUI extends JFrame {
 		}
 		DefaultMutableTreeNode treeNodeParent;
 		int index;
-		if (null == treeNodeParentMoved) {
-			treeNodeParent = treeNodeRoot;
-			index = treeNodeParent.getChildCount();
-		} else {
-			if (treeNodeMoved.getAllowsChildren() && isChildAdd) {
-				treeNodeParent = treeNodeMoved;
+		if (isChildAdd) {
+			if (null == treeNodeParentMoved) {
+				treeNodeParent = treeNodeRoot;
 				index = treeNodeParent.getChildCount();
 			} else {
+				if (treeNodeMoved.getAllowsChildren() && isChildAdd) {
+					treeNodeParent = treeNodeMoved;
+					index = treeNodeParent.getChildCount();
+				} else {
+					treeNodeParent = treeNodeParentMoved;
+					index = treeNodeParent.getIndex(treeNodeMoved);
+				}
+			}
+		} else {
+			if (treeNodeParentMoved == treeNodeParentDragged) {
 				treeNodeParent = treeNodeParentMoved;
 				index = treeNodeParent.getIndex(treeNodeMoved);
+			} else {
+				return;
 			}
 		}
 		if (treeNodeParent.getAllowsChildren()) {
@@ -2297,7 +2365,7 @@ public class PixelShaderUI extends JFrame {
 		}
 	}
 
-	private void updataGraphics() {
+	private void updateGraphics() {
 		updateJTree();
 		drawResources();
 	}
@@ -2330,10 +2398,10 @@ public class PixelShaderUI extends JFrame {
 			}
 			treeCellRenderer.setResourcesList(layerListRoot);
 			DefaultTreeModel modelRoot = (DefaultTreeModel) jTreeRoot.getModel();
-			if (null != modelRoot) {
-				Object root = modelRoot.getRoot();
-				if (null != root && root instanceof DefaultMutableTreeNode) {
-					updateTreeNode((DefaultMutableTreeNode) root, layerListRoot);
+			updateTreeNode(modelRoot, layerListRoot);
+			if (isUpdate) {
+				if (null != modelProperties) {
+					updateTreeNode(modelRoot, modelProperties);
 				}
 			}
 		}
@@ -2350,6 +2418,7 @@ public class PixelShaderUI extends JFrame {
 			ImageLayer layer;
 			String fileName;
 			String layerPath;
+			String modelString;
 			String imagePath = "imagePath";
 			Properties propLayer;
 			Properties prop = null;
@@ -2358,32 +2427,42 @@ public class PixelShaderUI extends JFrame {
 				file = iterator.next();
 				if (null != file) {
 					fileName = file.getName().toLowerCase();
-					if (fileName.endsWith(suffixes_Project)) {
-						propertiesUtils.setSuffixProperties(suffixes_Project);
-						propLayer = propertiesUtils.loadProperties(file, true);
+					if (fileName.endsWith(tag_suffixes_project)) {
+						propLayer = propertiesUtils.loadPropertiesXml(file, tag_suffixes_project);
 						if (null != propLayer) {
-							for (Iterator<Object> iteratorProperties = propLayer.values().iterator(); iteratorProperties
-									.hasNext();) {
-								object = iteratorProperties.next();
-								if (null != object && object instanceof String) {
-									layerPath = (String) object;
-									file = new File(layerPath);
-									propertiesUtils.setSuffixProperties(suffixes_Layer);
-									prop = propertiesUtils.loadProperties(file, true);
-									if (null != prop) {
-										file = fileUtils.getFile(fileList, prop.getProperty(imagePath));
-										if (null == file) {
-											imageLayer = new ImageLayer();
-											imageLayer.setProperties(prop);
-											layerList.add(imageLayer);
+							modelString = propLayer.getProperty(tag_model);
+							if (null != modelString) {
+								object = objectUtils.getProperties(modelString);
+								if (null != object) {
+									modelProperties = (Properties) object;
+									isUpdate = true;
+								} else {
+									modelProperties = null;
+									isUpdate = false;
+								}
+								for (Iterator<Object> iteratorProperties = propLayer.values()
+										.iterator(); iteratorProperties.hasNext();) {
+									object = iteratorProperties.next();
+									if (null != object && object instanceof String) {
+										layerPath = (String) object;
+										if (layerPath.toLowerCase().endsWith(tag_suffixes_layer.toLowerCase())) {
+											file = new File(layerPath);
+											prop = propertiesUtils.loadPropertiesXml(file, tag_suffixes_layer);
+											if (null != prop) {
+												file = fileUtils.getFile(fileList, prop.getProperty(imagePath));
+												if (null == file) {
+													imageLayer = new ImageLayer();
+													imageLayer.setProperties(prop);
+													layerList.add(imageLayer);
+												}
+											}
 										}
 									}
 								}
 							}
 						}
-					} else if (fileName.endsWith(suffixes_Layer)) {
-						propertiesUtils.setSuffixProperties(suffixes_Layer);
-						prop = propertiesUtils.loadProperties(file, true);
+					} else if (fileName.endsWith(tag_suffixes_layer)) {
+						prop = propertiesUtils.loadPropertiesXml(file, tag_suffixes_layer);
 						if (null != prop) {
 							file = fileUtils.getFile(fileList, prop.getProperty(imagePath));
 							if (null == file) {
@@ -2417,10 +2496,13 @@ public class PixelShaderUI extends JFrame {
 			int depth;
 			int depthMax = fileUtils.getImageLayerDepthMax(layerListRoot) + 1;
 			int index;
+//			for (@SuppressWarnings("unchecked")
+//			Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNodeRoot
+//			.preorderEnumeration(); treeNodeEnumeration.hasMoreElements();) {
 			for (@SuppressWarnings("unchecked")
-			Enumeration<TreeNode> treeNodeEnumeration = treeNodeRoot.preorderEnumeration(); treeNodeEnumeration
-					.hasMoreElements();) {
-				treeNode = (DefaultMutableTreeNode) treeNodeEnumeration.nextElement();
+			Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNodeRoot
+					.breadthFirstEnumeration(); treeNodeEnumeration.hasMoreElements();) {
+				treeNode = treeNodeEnumeration.nextElement();
 				if (null != treeNode) {
 					object = treeNode.getUserObject();
 					if (null != object && object instanceof String) {
@@ -2442,32 +2524,59 @@ public class PixelShaderUI extends JFrame {
 		}
 	}
 
-	private void updateTreeNode(DefaultMutableTreeNode parent, List<ImageLayer> layerList) {
-		if (null == layerList || null == parent || !(parent instanceof DefaultMutableTreeNode)
-				|| !parent.getAllowsChildren()) {
-			return;
-		}
-		DefaultTreeModel modelRoot = (DefaultTreeModel) jTreeRoot.getModel();
-		String pathName;
-		String imagePath;
-		File file;
-		DefaultMutableTreeNode treeNode;
-		ImageLayer imageLayer;
-		for (Iterator<ImageLayer> iterator = layerList.iterator(); iterator.hasNext();) {
-			imageLayer = iterator.next();
-			if (null != imageLayer) {
-				treeNode = new DefaultMutableTreeNode();
-				imagePath = imageLayer.getImagePath();
-				if (null != imagePath) {
-					file = new File(imagePath);
-					pathName = file.getName();
-					treeNode.setUserObject(pathName);
-					if (!isTreeNodeChild(parent, treeNode)) {
-						modelRoot.insertNodeInto(treeNode, parent, 0);
-						modelRoot.nodeChanged(parent);
+	private void updateTreeNode(DefaultTreeModel treeModel, List<ImageLayer> layerList) {
+		if (null != layerList) {
+			DefaultMutableTreeNode nodeRoot;
+			if (null == treeModel) {
+				nodeRoot = new DefaultMutableTreeNode();
+				treeModel = new DefaultTreeModel(nodeRoot);
+			} else {
+				nodeRoot = (DefaultMutableTreeNode) treeModel.getRoot();
+			}
+			String pathName;
+			String imagePath;
+			File file;
+			DefaultMutableTreeNode node;
+			ImageLayer imageLayer;
+			for (Iterator<ImageLayer> iterator = layerList.iterator(); iterator.hasNext();) {
+				imageLayer = iterator.next();
+				if (null != imageLayer) {
+					node = new DefaultMutableTreeNode();
+					imagePath = imageLayer.getImagePath();
+					if (null != imagePath) {
+						file = new File(imagePath);
+						pathName = file.getName();
+						node.setUserObject(pathName);
+						if (!isTreeNodeChild(nodeRoot, node)) {
+							treeModel.insertNodeInto(node, nodeRoot, 0);
+							treeModel.nodeChanged(nodeRoot);
+						}
 					}
 				}
 			}
+		}
+	}
+
+	private void updateTreeNode(DefaultTreeModel modelRoot, Properties properties) {
+		treeModelUtils.loadNode(modelRoot, properties);
+	}
+
+	private void warning() {
+		String description = "当前操作将销毁现有数据，请选择【是】保存工程！";
+		int messageStyle = JOptionPane.showConfirmDialog(null, description);// yes=0;no=1;cancel=2
+		if (messageStyle == 0) {
+			if (null != layerListRoot && layerListRoot.size() != 0) {
+				storeResources(openFiles(fileFilterStyle_Project), 0);
+				description = "操作完成！";
+			} else {
+				description = "项目为空！";
+			}
+			JOptionPane.showMessageDialog(null, description);
+		} else if (messageStyle == 1) {
+			description = "原有项目未保存！";
+			JOptionPane.showMessageDialog(null, description);
+		} else if (messageStyle == 2) {
+			return;
 		}
 	}
 }
