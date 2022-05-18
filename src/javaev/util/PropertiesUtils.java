@@ -25,6 +25,7 @@ public class PropertiesUtils {
 	private Properties propertiesLocal;
 
 	private String suffix_properties;
+	private String tag_comment = "setting";
 
 	public PropertiesUtils() {
 	}
@@ -71,33 +72,45 @@ public class PropertiesUtils {
 	}
 
 	public String getSuffixProperties() {
+		if (null == suffix_properties) {
+			suffix_properties = suffix_properties_xml;
+		}
 		return suffix_properties;
 	}
 
 	public boolean isFileProperties(File file) {
-		String name = file.getName().toLowerCase();
-		if (name.endsWith(suffix_properties)) {
-			return true;
+		if (null != file) {
+			String name = file.getName().toLowerCase();
+			if (name.endsWith(getSuffixProperties().toLowerCase())) {
+				return true;
+			}
 		}
 		return false;
 	}
 
-	public Properties loadProperties(File file, boolean isTypeXml) {
+	public Properties loadProperties(File file) {
+		return loadProperties(file, false);
+	}
+
+	private Properties loadProperties(File file, boolean isTypeXml) {
 		if (null != file) {
-			InputStream stream;
-			try {
-				stream = new FileInputStream(file);
-				if (isFileProperties(file)) {
-					return loadProperties(stream, isTypeXml);
+			if (isFileProperties(file)) {
+				try {
+					return loadProperties(new FileInputStream(file), isTypeXml);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
 				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
 			}
 		}
 		return null;
 	}
 
-	public Properties loadProperties(InputStream stream, boolean isTypeXml) {
+	public Properties loadProperties(File file, String fileSuffix) {
+		setSuffixProperties(fileSuffix);
+		return loadProperties(file);
+	}
+
+	private Properties loadProperties(InputStream stream, boolean isTypeXml) {
 		if (null != stream) {
 			Properties properties = new Properties();
 			try {
@@ -121,6 +134,11 @@ public class PropertiesUtils {
 		return loadProperties(file, true);
 	}
 
+	public Properties loadPropertiesXml(File file, String fileSuffix) {
+		setSuffixProperties(fileSuffix);
+		return loadPropertiesXml(file);
+	}
+
 	private void setEcoding(String encoding) {
 		if (null != encoding && Charset.isSupported(encoding)) {
 			encoding_properties = encoding;
@@ -139,18 +157,35 @@ public class PropertiesUtils {
 		}
 	}
 
-	public void storeProperties(boolean isTypeXml, File file, String comment, String encoding) {
-		storeProperties(propertiesLocal, isTypeXml, file, comment, encoding);
+	private void storeProperties(boolean isTypeXml, File file, String comment, String encoding) {
+		storeProperties(getProperties(), isTypeXml, file, comment, encoding);
 	}
 
-	public void storeProperties(Properties properties, boolean isTypeXml, File file, String comment, String encoding) {
+	public void storeProperties(File file) {
+		storeProperties(file, tag_comment, getEcoding());
+	}
+
+	public void storeProperties(File file, String fileSuffix) {
+		storeProperties(file, fileSuffix, tag_comment, getEcoding());
+	}
+
+	public void storeProperties(File file, String comment, String encoding) {
+		storeProperties(false, file, comment, encoding);
+	}
+
+	public void storeProperties(File file, String fileSuffix, String comment, String encoding) {
+		setSuffixProperties(fileSuffix);
+		storeProperties(file, comment, encoding);
+	}
+
+	private void storeProperties(Properties properties, boolean isTypeXml, File file, String comment, String encoding) {
 		if (null != file) {
 			try {
 				if (!file.exists()) {
 					file.createNewFile();
 				}
 				if (isFileProperties(file)) {
-					storeProperties(propertiesLocal, isTypeXml, new FileOutputStream(file), comment, encoding);
+					storeProperties(properties, isTypeXml, new FileOutputStream(file), comment, encoding);
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -160,9 +195,10 @@ public class PropertiesUtils {
 		}
 	}
 
-	public void storeProperties(Properties properties, boolean isTypeXml, OutputStream stream, String comment,
+	private void storeProperties(Properties properties, boolean isTypeXml, OutputStream stream, String comment,
 			String encoding) {
 		if (null != properties) {
+			properties = getPropertiesString(properties);
 			setEcoding(encoding);
 			encoding = getEcoding();
 			try {
@@ -179,7 +215,56 @@ public class PropertiesUtils {
 		}
 	}
 
+	public void storeProperties(Properties properties, File file) {
+		storeProperties(properties, file, tag_comment, getEcoding());
+	}
+
+	public void storeProperties(Properties properties, File file, String fileSuffix) {
+		setSuffixProperties(fileSuffix);
+		storeProperties(properties, file, tag_comment, getEcoding());
+	}
+
+	public void storeProperties(Properties properties, File file, String comment, String encoding) {
+		storeProperties(properties, false, file, comment, encoding);
+	}
+
+	public void storeProperties(Properties properties, File file, String fileSuffix, String comment, String encoding) {
+		setSuffixProperties(fileSuffix);
+		storeProperties(properties, file, comment, encoding);
+	}
+
+	public void storePropertiesXml(File file) {
+		storePropertiesXml(file, tag_comment, getEcoding());
+	}
+
+	public void storePropertiesXml(File file, String fileSuffix) {
+		storePropertiesXml(file, fileSuffix, tag_comment, getEcoding());
+	}
+
 	public void storePropertiesXml(File file, String comment, String encoding) {
 		storeProperties(true, file, comment, encoding);
+	}
+
+	public void storePropertiesXml(File file, String fileSuffix, String comment, String encoding) {
+		setSuffixProperties(fileSuffix);
+		storePropertiesXml(file, comment, encoding);
+	}
+
+	public void storePropertiesXml(Properties properties, File file) {
+		storePropertiesXml(properties, file, tag_comment, getEcoding());
+	}
+
+	public void storePropertiesXml(Properties properties, File file, String fileSuffix) {
+		storePropertiesXml(properties, file, fileSuffix, tag_comment, getEcoding());
+	}
+
+	public void storePropertiesXml(Properties properties, File file, String comment, String encoding) {
+		storeProperties(properties, true, file, comment, encoding);
+	}
+
+	public void storePropertiesXml(Properties properties, File file, String fileSuffix, String comment,
+			String encoding) {
+		setSuffixProperties(fileSuffix);
+		storePropertiesXml(properties, file, comment, encoding);
 	}
 }
