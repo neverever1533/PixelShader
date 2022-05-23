@@ -182,9 +182,7 @@ public class ImageLayer {
 	}
 
 	public void isVisible(boolean isVisible) {
-//		if (isVisibleLayer != isVisible) {
 		isVisibleLayer = isVisible;
-//		}
 	}
 
 	public void read(File file) {
@@ -417,27 +415,18 @@ public class ImageLayer {
 				}
 			}
 			value = properties.get(tag_location);
-//			System.out.print("location1:");
-//			System.out.println(value);
 			if (null != value) {
 				if (value instanceof PointUtils) {
-//					System.out.println(1);
 					setLocation((PointUtils) value);
 				} else if (value instanceof Point) {
-//					System.out.println(2);
 					setLocation((Point) value);
 				} else {
 					value_String = String.valueOf(value);
-//					System.out.println(3);
 					object = objectUtils.getObject(value_String);
-//					System.out.print("location2:");
-//					System.out.println(object);
 					if (null != object) {
 						if (object instanceof PointUtils) {
-//							System.out.println(4);
 							setLocation((PointUtils) object);
 						} else if (object instanceof Point) {
-//							System.out.println(5);
 							setLocation((Point) object);
 						}
 					}
