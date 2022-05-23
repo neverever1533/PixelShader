@@ -35,6 +35,9 @@ public class ImageLayer {
 
 	private PointUtils locationLayer;
 
+	private Object objectLayer;
+	private Object objectLayerSuper;
+
 	private ObjectUtils objectUtils = new ObjectUtils();
 
 	private PointUtils rootLayer;
@@ -53,6 +56,8 @@ public class ImageLayer {
 	private String tag_isGravity = "isGravity";
 	private String tag_isVisible = "isVisible";
 	private String tag_location = "location";
+	private String tag_object_this = "this";
+	private String tag_object_super = "super";
 	private String tag_root = "root";
 	private String tag_rotated = "rotated";
 	private String tag_scale = "scale";
@@ -86,6 +91,14 @@ public class ImageLayer {
 		return locationLayer;
 	}
 
+	public Object getObject() {
+		return objectLayer;
+	}
+
+	public Object getObjectSuper() {
+		return objectLayerSuper;
+	}
+
 	public Properties getProperties() {
 		Properties properties = new Properties();
 		properties.put(tag_alpha, getAlpha());
@@ -115,6 +128,14 @@ public class ImageLayer {
 		PointUtils root = getRoot();
 		if (null != root) {
 			properties.put(tag_root, root);
+		}
+		Object object = getObject();
+		if (null != object) {
+			properties.put(tag_object_this, object);
+		}
+		object = getObjectSuper();
+		if (null != object) {
+			properties.put(tag_object_super, object);
 		}
 		properties.put(tag_isAlpha, isAlpha());
 		properties.put(tag_isGravity, isGravity());
@@ -161,9 +182,9 @@ public class ImageLayer {
 	}
 
 	public void isVisible(boolean isVisible) {
-		if (isVisibleLayer != isVisible) {
-			isVisibleLayer = isVisible;
-		}
+//		if (isVisibleLayer != isVisible) {
+		isVisibleLayer = isVisible;
+//		}
 	}
 
 	public void read(File file) {
@@ -214,12 +235,12 @@ public class ImageLayer {
 		setAnchor(point);
 	}
 
-	public void setAnchor(PointUtils anchor) {
-		anchorLayer = anchor;
-	}
-
 	public void setAnchor(Point anchor) {
 		setAnchor(new PointUtils(anchor));
+	}
+
+	public void setAnchor(PointUtils anchor) {
+		anchorLayer = anchor;
 	}
 
 	public void setDepth(int depth) {
@@ -248,6 +269,10 @@ public class ImageLayer {
 
 	public void setImagePath(String filePath) {
 		imagePathLayer = filePath;
+		if (null != filePath) {
+			File file = new File(filePath);
+			setObject(file.getName());
+		}
 	}
 
 	public void setLocation(double tx, double ty) {
@@ -262,6 +287,14 @@ public class ImageLayer {
 
 	public void setLocation(PointUtils location) {
 		locationLayer = location;
+	}
+
+	public void setObject(Object object) {
+		objectLayer = object;
+	}
+
+	public void setObjectSuper(Object object) {
+		objectLayerSuper = object;
 	}
 
 	public void setProperties(Properties properties) {
@@ -283,18 +316,20 @@ public class ImageLayer {
 				} else {
 					value_String = String.valueOf(value);
 					object = objectUtils.getObject(value_String);
-					if (null != object && object instanceof DimensionUtils) {
-						setSize((DimensionUtils) object);
-					}
-					if (null != object && object instanceof Dimension) {
-						setSize((Dimension) object);
+					if (null != object) {
+						if (object instanceof DimensionUtils) {
+							setSize((DimensionUtils) object);
+						} else if (object instanceof Dimension) {
+							setSize((Dimension) object);
+						}
 					}
 				}
 			}
 			value = properties.get(tag_alpha);
 			if (null != value) {
 				if (value instanceof Number) {
-					setAlpha((float) value);
+//					setAlpha((float) value);
+					setAlpha(Float.valueOf(value.toString()));
 				} else {
 					value_String = String.valueOf(value);
 					object = objectUtils.getObject(value_String);
@@ -312,11 +347,12 @@ public class ImageLayer {
 				} else {
 					value_String = String.valueOf(value);
 					object = objectUtils.getObject(value_String);
-					if (null != object && object instanceof PointUtils) {
-						setAnchor((PointUtils) object);
-					}
-					if (null != object && object instanceof Point) {
-						setAnchor((Point) object);
+					if (null != object) {
+						if (object instanceof PointUtils) {
+							setAnchor((PointUtils) object);
+						} else if (object instanceof Point) {
+							setAnchor((Point) object);
+						}
 					}
 				}
 			}
@@ -381,18 +417,29 @@ public class ImageLayer {
 				}
 			}
 			value = properties.get(tag_location);
+//			System.out.print("location1:");
+//			System.out.println(value);
 			if (null != value) {
 				if (value instanceof PointUtils) {
+//					System.out.println(1);
 					setLocation((PointUtils) value);
 				} else if (value instanceof Point) {
+//					System.out.println(2);
 					setLocation((Point) value);
 				} else {
 					value_String = String.valueOf(value);
+//					System.out.println(3);
 					object = objectUtils.getObject(value_String);
-					if (null != object && object instanceof PointUtils) {
-						setLocation((PointUtils) object);
-					} else if (null != object && object instanceof Point) {
-						setLocation((Point) object);
+//					System.out.print("location2:");
+//					System.out.println(object);
+					if (null != object) {
+						if (object instanceof PointUtils) {
+//							System.out.println(4);
+							setLocation((PointUtils) object);
+						} else if (object instanceof Point) {
+//							System.out.println(5);
+							setLocation((Point) object);
+						}
 					}
 				}
 			}
@@ -405,10 +452,12 @@ public class ImageLayer {
 				} else {
 					value_String = String.valueOf(value);
 					object = objectUtils.getObject(value_String);
-					if (null != object && object instanceof PointUtils) {
-						setRoot((PointUtils) object);
-					} else if (null != object && object instanceof Point) {
-						setRoot((Point) object);
+					if (null != object) {
+						if (object instanceof PointUtils) {
+							setRoot((PointUtils) object);
+						} else if (object instanceof Point) {
+							setRoot((Point) object);
+						}
 					}
 				}
 			}
@@ -433,12 +482,22 @@ public class ImageLayer {
 				} else {
 					value_String = String.valueOf(value);
 					object = objectUtils.getObject(value_String);
-					if (null != object && object instanceof DimensionUtils) {
-						scale((DimensionUtils) object);
-					} else if (null != object && object instanceof Dimension) {
-						scale((Dimension) object);
+					if (null != object) {
+						if (object instanceof DimensionUtils) {
+							scale((DimensionUtils) object);
+						} else if (object instanceof Dimension) {
+							scale((Dimension) object);
+						}
 					}
 				}
+			}
+			value = properties.get(tag_object_this);
+			if (null != value) {
+				setObject(value);
+			}
+			value = properties.get(tag_object_super);
+			if (null != value) {
+				setObjectSuper(value);
 			}
 		}
 	}
@@ -484,6 +543,7 @@ public class ImageLayer {
 		} else {
 			PointUtils point = null;
 			setAnchor(point);
+//			setRoot(point);
 		}
 		setRoot(getAnchor());
 		sizeLayer = dimension;
