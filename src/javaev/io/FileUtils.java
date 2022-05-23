@@ -100,16 +100,12 @@ public class FileUtils {
 		return null;
 	}
 
-	public File getFile(File file, String suffix) {
-		return getFile(file, null, suffix);
-	}
-
 	public File getFile(File file, Object name, String suffix) {
 		return getFile(file, name, false, suffix);
 	}
 
-	public File getFileReplace(File file, Object name, String suffix) {
-		return getFile(file, name, true, suffix);
+	public File getFile(File file, String suffix) {
+		return getFile(file, null, suffix);
 	}
 
 	public File getFile(List<File> list, String fileName) {
@@ -208,6 +204,10 @@ public class FileUtils {
 		return toStringArray(fileArray, false);
 	}
 
+	public File getFileReplace(File file, Object name, String suffix) {
+		return getFile(file, name, true, suffix);
+	}
+
 	public ImageLayer getImageLayer(List<ImageLayer> list, File file) {
 		if (null != file) {
 			return getImageLayer(list, file.getPath());
@@ -270,6 +270,14 @@ public class FileUtils {
 
 	public String[] getSuffixArray() {
 		return suffixArray;
+	}
+
+	public int indexOf(List<ImageLayer> list, String fileName) {
+		ImageLayer layer = getImageLayer(list, fileName);
+		if (null != layer) {
+			return list.indexOf(layer);
+		}
+		return -1;
 	}
 
 	public boolean isDirectoryArrayOnly(File[] fileArray) {
