@@ -14,27 +14,6 @@ public class DefaultMutableTreeNodeUtils {
 	private String tag_comma = ObjectUtils.tag_comma;
 	private String tag_null = ObjectUtils.tag_null;
 
-	public boolean equals(DefaultMutableTreeNode treeNodeAncestor, DefaultMutableTreeNode treeNodeDescendant) {
-		if (null != treeNodeAncestor && null != treeNodeDescendant) {
-			Object ancestor = treeNodeDescendant.getUserObject();
-			if (null != ancestor) {
-				ancestor = ancestor.toString();
-			} else {
-				ancestor = tag_null;
-			}
-			Object descendant = treeNodeDescendant.getUserObject();
-			if (null != descendant) {
-				descendant = descendant.toString();
-			} else {
-				descendant = tag_null;
-			}
-			if (descendant.equals(ancestor)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public DefaultMutableTreeNode getTreeNode(DefaultMutableTreeNode treeNode, Object object) {
 		if (null != treeNode) {
 			if (null != object) {
@@ -76,6 +55,28 @@ public class DefaultMutableTreeNodeUtils {
 		return null;
 	}
 
+	public boolean equals(DefaultMutableTreeNode treeNodeAncestor, DefaultMutableTreeNode treeNodeDescendant) {
+		if (null != treeNodeAncestor && null != treeNodeDescendant) {
+			Object ancestor = treeNodeDescendant.getUserObject();
+			if (null != ancestor) {
+				ancestor = ancestor.toString();
+			} else {
+				ancestor = tag_null;
+			}
+			Object descendant = treeNodeDescendant.getUserObject();
+			if (null != descendant) {
+				descendant = descendant.toString();
+			} else {
+				descendant = tag_null;
+			}
+			if (descendant.equals(ancestor)) {
+//				treeNodeDescendant = treeNodeAncestor;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private Properties putNode(Properties properties, int index, LayerNode node) {
 		if (null != properties && null != node) {
 			properties.put(index, node);
@@ -96,29 +97,31 @@ public class DefaultMutableTreeNodeUtils {
 			}
 			TreeNode nodeParent;
 			DefaultMutableTreeNode node;
-			Object parent = null;
-			Object child = null;
+			Object object_super = null;
+			Object object_this = null;
 			LayerNode node_;
 			nodeParent = treeNode.getParent();
 			if (null != nodeParent) {
-				parent = ((DefaultMutableTreeNode) nodeParent).getUserObject();
+				object_super = ((DefaultMutableTreeNode) nodeParent).getUserObject();
 			} else {
-				parent = null;
+				object_super = null;
 			}
-			if (null != parent) {
-				parent = parent.toString();
+			if (null != object_super) {
+				object_super = object_super.toString();
 			} else {
-				parent = tag_null;
+				object_super = tag_null;
 			}
-			child = treeNode.getUserObject();
-			if (null != child) {
-				child = child.toString();
+			object_this = treeNode.getUserObject();
+			if (null != object_this) {
+				object_this = object_this.toString();
 			} else {
-				child = tag_null;
+				object_this = tag_null;
 			}
-			node_ = new LayerNode(index, parent, child);
-			properties = putNode(properties, index, node_);
-			index = (int) properties.get(tag_index);
+			if (!object_super.equals(tag_null)) {
+				node_ = new LayerNode(index, object_super, object_this);
+				properties = putNode(properties, index, node_);
+				index = (int) properties.get(tag_index);
+			}
 			if (treeNode.getChildCount() != 0) {
 				for (@SuppressWarnings("unchecked")
 				Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNode.children(); treeNodeEnumeration
