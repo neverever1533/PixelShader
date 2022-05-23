@@ -3,15 +3,14 @@ package cn.imaginary.toolkit.swing.tree;
 import javaev.lang.ObjectUtils;
 
 public class LayerNode {
-	public static String tag_layer_node_child = "child";
 	public static String tag_layer_node_id = "id";
-	public static String tag_layer_node_parent = "parent";
+	public static String tag_layer_node_super = "super";
+	public static String tag_layer_node_this = "this";
 
-	private Object child_node;
+	private int id_layer;
 
-	private int id_node;
-
-	private Object parent_node;
+	private Object object_super;
+	private Object object_this;
 
 	private String tag_bracket_close = ObjectUtils.tag_bracket_close;
 	private String tag_bracket_open = ObjectUtils.tag_bracket_open;
@@ -21,48 +20,48 @@ public class LayerNode {
 	public LayerNode() {
 	}
 
-	public LayerNode(int id, Object parent, Object child) {
-		set(id, parent, child);
+	public LayerNode(int id, Object super_object, Object this_object) {
+		set(id, super_object, this_object);
 	}
 
 	public LayerNode(LayerNode layerNode) {
 		set(layerNode);
 	}
 
-	public Object getChild() {
-		return child_node;
-	}
-
 	public int getID() {
-		return id_node;
+		return id_layer;
 	}
 
-	public Object getParent() {
-		return parent_node;
+	public Object getObject() {
+		return object_this;
 	}
 
-	public void set(int id, Object parent, Object child) {
+	public Object getObjectSuper() {
+		return object_super;
+	}
+
+	public void set(int id, Object super_object, Object this_object) {
 		setID(id);
-		setParent(parent);
-		setChild(child);
+		setObjectSuper(super_object);
+		setObject(this_object);
 	}
 
 	public void set(LayerNode layerNode) {
 		if (null != layerNode) {
-			set(layerNode.getID(), layerNode.getParent(), layerNode.getChild());
+			set(layerNode.getID(), layerNode.getObjectSuper(), layerNode.getObject());
 		}
 	}
 
-	public void setChild(Object child) {
-		child_node = child;
-	}
-
 	public void setID(int id) {
-		id_node = id;
+		id_layer = id;
 	}
 
-	public void setParent(Object parent) {
-		parent_node = parent;
+	public void setObject(Object object) {
+		object_this = object;
+	}
+
+	public void setObjectSuper(Object object) {
+		object_super = object;
 	}
 
 	public String toString() {
@@ -73,13 +72,13 @@ public class LayerNode {
 		sbuf.append(tag_equals);
 		sbuf.append(getID());
 		sbuf.append(tag_comma);
-		sbuf.append(tag_layer_node_parent);
+		sbuf.append(tag_layer_node_super);
 		sbuf.append(tag_equals);
-		sbuf.append(getParent());
+		sbuf.append(getObjectSuper());
 		sbuf.append(tag_comma);
-		sbuf.append(tag_layer_node_child);
+		sbuf.append(tag_layer_node_this);
 		sbuf.append(tag_equals);
-		sbuf.append(getChild());
+		sbuf.append(getObject());
 		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
 	}
