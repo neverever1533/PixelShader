@@ -1,5 +1,8 @@
 package cn.imaginary.toolkit.swing.tree;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,8 +41,8 @@ public class DefaultTreeModelUtils {
 		return getTreeNode(getModel(), object);
 	}
 
-	public DefaultTreeModel loadNode(DefaultTreeModel treeModel, Properties properties) {
-		if (null != properties) {
+	public DefaultTreeModel loadNode(DefaultTreeModel treeModel, List<Object> list) {
+		if (null != list) {
 			DefaultMutableTreeNode nodeRoot;
 			if (null == treeModel) {
 				nodeRoot = new DefaultMutableTreeNode();
@@ -47,33 +50,31 @@ public class DefaultTreeModelUtils {
 			} else {
 				nodeRoot = (DefaultMutableTreeNode) treeModel.getRoot();
 			}
-			int size = properties.size();
 			LayerNode layerNode;
 			DefaultMutableTreeNode node;
 			DefaultMutableTreeNode nodeParent;
 			DefaultMutableTreeNode nodeChild;
+			Object object_super;
+			Object object_this;
 			Object object;
-			Object parent;
-			Object child;
-//			for (int i = 0; i < size; i++) {
-			for (int i = size - 1; i >= 0; i--) {
-				object = properties.get(i);
+			for (Iterator<Object> iterator = list.iterator(); iterator.hasNext();) {
+				object = iterator.next();
 				if (null != object && object instanceof LayerNode) {
 					layerNode = (LayerNode) object;
-					parent = layerNode.getParent();
-					if (null != parent) {
-						parent = parent.toString();
+					object_super = layerNode.getObjectSuper();
+					if (null != object_super) {
+						object_super = object_super.toString();
 					} else {
-						parent = tag_null;
+						object_super = tag_null;
 					}
-					child = layerNode.getChild();
-					if (null != child) {
-						child = child.toString();
+					object_this = layerNode.getObject();
+					if (null != object_this) {
+						object_this = object_this.toString();
 					} else {
-						child = tag_null;
+						object_this = tag_null;
 					}
-					nodeParent = treeNodeUtils.getTreeNode(nodeRoot, parent);
-					nodeChild = treeNodeUtils.getTreeNode(nodeRoot, child);
+					nodeParent = treeNodeUtils.getTreeNode(nodeRoot, object_super);
+					nodeChild = treeNodeUtils.getTreeNode(nodeRoot, object_this);
 					if (null != nodeParent && null != nodeChild) {
 						node = (DefaultMutableTreeNode) nodeChild.getParent();
 						if (null != node) {
@@ -83,7 +84,7 @@ public class DefaultTreeModelUtils {
 							} else {
 								object = tag_null;
 							}
-							if (!object.equals(parent)) {
+							if (!object.equals(object_super)) {
 								if (nodeParent.getAllowsChildren()) {
 									treeModel.removeNodeFromParent(nodeChild);
 									treeModel.insertNodeInto(nodeChild, nodeParent, 0);
@@ -98,6 +99,24 @@ public class DefaultTreeModelUtils {
 		return treeModel;
 	}
 
+	public DefaultTreeModel loadNode(DefaultTreeModel treeModel, Properties properties) {
+		if (null != properties) {
+			int size = properties.size();
+			List<Object> list = new ArrayList<>();
+			Object object;
+//			for (int i = 0, iLength = size; i < iLength; i++) {
+//			for (int i = size; i >= 0; i--) {
+			for (int i = size - 1; i >= 0; i--) {
+				object = properties.get(i);
+				if (null != object) {
+					list.add(object);
+				}
+			}
+			return loadNode(treeModel, list);
+		}
+		return null;
+	}
+
 	public DefaultTreeModel loadNode(Properties properties) {
 		return loadNode(getModel(), properties);
 	}
@@ -109,6 +128,7 @@ public class DefaultTreeModelUtils {
 	public Properties storeNode() {
 		return storeNode(getModel());
 	}
+
 	public Properties storeNode(DefaultTreeModel treeModel) {
 		if (null != treeModel) {
 			Properties properties = new Properties();
