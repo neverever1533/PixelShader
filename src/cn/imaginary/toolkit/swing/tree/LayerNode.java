@@ -2,7 +2,7 @@ package cn.imaginary.toolkit.swing.tree;
 
 import javaev.lang.ObjectUtils;
 
-public class LayerNode {
+public class LayerNode implements Comparable<LayerNode> {
 	public static String tag_layer_node_id = "id";
 	public static String tag_layer_node_super = "super";
 	public static String tag_layer_node_this = "this";
@@ -81,5 +81,10 @@ public class LayerNode {
 		sbuf.append(getObject());
 		sbuf.append(tag_bracket_close);
 		return sbuf.toString();
+	}
+
+	@Override
+	public int compareTo(LayerNode o) {
+		return this.getID() - o.getID();
 	}
 }
