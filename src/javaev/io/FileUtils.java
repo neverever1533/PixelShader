@@ -64,17 +64,6 @@ public class FileUtils {
 		return null;
 	}
 
-	/*
-	 * 暂时仅用于解析音频文件正确格式类型;
-	 */
-	public String getContentTypeReal(File file) {
-		if (null != file) {
-			FileTypeUtils ftu = new FileTypeUtils();
-			return ftu.decodeFileType(file);
-		}
-		return null;
-	}
-
 	public File getFile(File file, Object name, boolean isReplace, String suffix) {
 		if (null != file && null != suffix) {
 			File dir;
