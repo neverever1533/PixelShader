@@ -12,12 +12,14 @@ import javaev.awt.DimensionUtils;
 import javaev.awt.PointUtils;
 
 import javaev.imageio.ImageIOUtils;
-
+import javaev.io.FileNameMapUtils;
 import javaev.io.FileUtils;
 
 import javaev.lang.ObjectUtils;
 
 public class ImageLayer {
+	FileNameMapUtils fileNameMapUtils = new FileNameMapUtils();
+
 	private float alphaLayer = 1.0f;
 
 	private PointUtils anchorLayer;
@@ -186,6 +188,10 @@ public class ImageLayer {
 		}
 	}
 
+	private boolean isImageFile(File file) {
+		return fileNameMapUtils.isFileImage(file);
+	}
+
 	public boolean isVisible() {
 		return isVisibleLayer;
 	}
@@ -216,20 +222,6 @@ public class ImageLayer {
 				isVisible(true);
 			}
 		}
-	}
-
-	private boolean isImageFile(File file) {
-		return isImageFile(file.getAbsolutePath());
-	}
-
-	private boolean isImageFile(String filePath) {
-		if (null != filePath) {
-			String temp = filePath.toLowerCase();
-			if (temp.endsWith(".png") || temp.endsWith(".jpg") || temp.endsWith(".bmp") || temp.endsWith(".jpeg")) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public void read(String filePath) {
