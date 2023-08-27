@@ -10,7 +10,10 @@ import java.util.Properties;
 
 import javaev.awt.DimensionUtils;
 import javaev.awt.PointUtils;
+
 import javaev.imageio.ImageIOUtils;
+
+import javaev.io.FileUtils;
 
 import javaev.lang.ObjectUtils;
 
@@ -21,6 +24,8 @@ public class ImageLayer {
 
 	private int depthLayer = -1;
 
+	private FileUtils fileUtils = FileUtils.getInstance();
+
 	private double gravityLayer;
 
 	private ImageIOUtils imageIOUtils = new ImageIOUtils();
@@ -29,11 +34,12 @@ public class ImageLayer {
 
 	private String imagePathLayer;
 
-	private boolean isAlphaLayer;
 	private boolean isGravityLayer;
 	private boolean isVisibleLayer;
 
 	private PointUtils locationLayer;
+
+	private String nameLayer;
 
 	private Object objectLayer;
 	private Object objectLayerSuper;
@@ -47,21 +53,23 @@ public class ImageLayer {
 	private DimensionUtils scaleLayer;
 	private DimensionUtils sizeLayer;
 
+	private String suffixLayer = ImageIOUtils.FileSuffixes_Default;
 	private String tag_alpha = "alpha";
 	private String tag_anchor = "anchor";
 	private String tag_depth = "depth";
 	private String tag_gravity = "gravity";
 	private String tag_imagePath = "imagePath";
-	private String tag_isAlpha = "isAlpha";
 	private String tag_isGravity = "isGravity";
 	private String tag_isVisible = "isVisible";
 	private String tag_location = "location";
-	private String tag_object_this = "this";
+	private String tag_name = "name";
 	private String tag_object_super = "super";
+	private String tag_object_this = "this";
 	private String tag_root = "root";
 	private String tag_rotated = "rotated";
 	private String tag_scale = "scale";
 	private String tag_size = "size";
+	private String tag_suffix = "suffix";
 
 	public float getAlpha() {
 		return alphaLayer;
@@ -91,6 +99,10 @@ public class ImageLayer {
 		return locationLayer;
 	}
 
+	public String getName() {
+		return nameLayer;
+	}
+
 	public Object getObject() {
 		return objectLayer;
 	}
@@ -102,6 +114,8 @@ public class ImageLayer {
 	public Properties getProperties() {
 		Properties properties = new Properties();
 		properties.put(tag_alpha, getAlpha());
+		properties.put(tag_name, getName());
+		properties.put(tag_suffix, getSuffix());
 		PointUtils anchor = getAnchor();
 		if (null != anchor) {
 			properties.put(tag_anchor, anchor);
@@ -137,7 +151,6 @@ public class ImageLayer {
 		if (null != object) {
 			properties.put(tag_object_super, object);
 		}
-		properties.put(tag_isAlpha, isAlpha());
 		properties.put(tag_isGravity, isGravity());
 		properties.put(tag_isVisible, isVisible());
 		return properties;
@@ -159,12 +172,8 @@ public class ImageLayer {
 		return sizeLayer;
 	}
 
-	public boolean isAlpha() {
-		return isAlphaLayer;
-	}
-
-	public void isAlpha(boolean isAlpha) {
-		isAlphaLayer = isAlpha;
+	public String getSuffix() {
+		return suffixLayer;
 	}
 
 	public boolean isGravity() {
@@ -187,12 +196,40 @@ public class ImageLayer {
 
 	public void read(File file) {
 		if (null != file) {
+			if (!isImageFile(file) || !file.exists()) {
+				return;
+			}
 			BufferedImage image = imageIOUtils.read(file);
 			if (null != image) {
 				setImage(image);
+				String name = fileUtils.getFileNamePrefix(file);
+				if (null == name) {
+					name = "";
+				}
+				setName(name);
+				String suffix = fileUtils.getFileNamePrefix(file);
+				if (null == suffix) {
+					suffix = "";
+				}
+				setSuffix(suffix);
 				setImagePath(file.getPath());
+				isVisible(true);
 			}
 		}
+	}
+
+	private boolean isImageFile(File file) {
+		return isImageFile(file.getAbsolutePath());
+	}
+
+	private boolean isImageFile(String filePath) {
+		if (null != filePath) {
+			String temp = filePath.toLowerCase();
+			if (temp.endsWith(".png") || temp.endsWith(".jpg") || temp.endsWith(".bmp") || temp.endsWith(".jpeg")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void read(String filePath) {
@@ -220,11 +257,6 @@ public class ImageLayer {
 			return;
 		}
 		alphaLayer = alpha;
-		if (alphaLayer == 1) {
-			isAlpha(false);
-		} else {
-			isAlpha(true);
-		}
 	}
 
 	public void setAnchor(double ax, double ay) {
@@ -262,7 +294,6 @@ public class ImageLayer {
 			DimensionUtils dimension = null;
 			setSize(dimension);
 		}
-		isAlpha(false);
 	}
 
 	public void setImagePath(String filePath) {
@@ -287,6 +318,10 @@ public class ImageLayer {
 		locationLayer = location;
 	}
 
+	public void setName(String name) {
+		nameLayer = name;
+	}
+
 	public void setObject(Object object) {
 		objectLayer = object;
 	}
@@ -304,6 +339,16 @@ public class ImageLayer {
 			if (null != value) {
 				value_String = String.valueOf(value);
 				read(value_String);
+			}
+			value = properties.get(tag_name);
+			if (null != value) {
+				value_String = String.valueOf(value);
+				setName(value_String);
+			}
+			value = properties.get(tag_suffix);
+			if (null != value) {
+				value_String = String.valueOf(value);
+				setSuffix(value_String);
 			}
 			value = properties.get(tag_size);
 			if (null != value) {
@@ -326,7 +371,6 @@ public class ImageLayer {
 			value = properties.get(tag_alpha);
 			if (null != value) {
 				if (value instanceof Number) {
-//					setAlpha((float) value);
 					setAlpha(Float.valueOf(value.toString()));
 				} else {
 					value_String = String.valueOf(value);
@@ -363,18 +407,6 @@ public class ImageLayer {
 					object = objectUtils.getObject(value_String);
 					if (null != object && object instanceof Number) {
 						setGravity((double) object);
-					}
-				}
-			}
-			value = properties.get(tag_isAlpha);
-			if (null != value) {
-				if (value instanceof Boolean) {
-					isAlpha((boolean) value);
-				} else {
-					value_String = String.valueOf(value);
-					object = objectUtils.getObject(value_String);
-					if (null != object && object instanceof Boolean) {
-						isAlpha((boolean) object);
 					}
 				}
 			}
@@ -532,7 +564,6 @@ public class ImageLayer {
 		} else {
 			PointUtils point = null;
 			setAnchor(point);
-//			setRoot(point);
 		}
 		setRoot(getAnchor());
 		sizeLayer = dimension;
@@ -542,5 +573,9 @@ public class ImageLayer {
 		DimensionUtils dimension = new DimensionUtils();
 		dimension.setSize(width, height);
 		setSize(dimension);
+	}
+
+	public void setSuffix(String suffix) {
+		suffixLayer = suffix;
 	}
 }
