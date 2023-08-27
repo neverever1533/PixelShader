@@ -68,7 +68,7 @@ import javaev.awt.Graphics2DUtils;
 import javaev.awt.PointUtils;
 
 import javaev.imageio.ImageIOUtils;
-
+import javaev.io.FileNameMapUtils;
 import javaev.io.FileUtils;
 
 import javaev.lang.ObjectUtils;
@@ -90,6 +90,8 @@ public class PixelShaderUI extends JFrame {
 		PixelShaderUI pixelShaderUI = new PixelShaderUI();
 		pixelShaderUI.setVisible(true);
 	}
+
+	private FileNameMapUtils fileNameMapUtils = new FileNameMapUtils();
 
 	private Color bgColor = Color.black;
 
@@ -2507,10 +2509,7 @@ public class PixelShaderUI extends JFrame {
 
 	private boolean isImageFile(String filePath) {
 		if (null != filePath) {
-			String temp = filePath.toLowerCase();
-			if (temp.endsWith(".png") || temp.endsWith(".jpg") || temp.endsWith(".bmp") || temp.endsWith(".jpeg")) {
-				return true;
-			}
+			return fileNameMapUtils.isFileImage(new File(filePath));
 		}
 		return false;
 	}
