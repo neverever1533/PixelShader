@@ -5,9 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import cn.imaginary.toolkit.image.ImageLayer;
@@ -22,46 +20,43 @@ import psd.model.Psd;
 public class PSDFileReader {
 	private FileUtils fileUtils = FileUtils.getInstance();
 
-	public static void main(String[] args) {
-		PSDFileReader pfr = new PSDFileReader();
-		ArrayList<ImageLayer> aList = new ArrayList<>();
-		String fp = "e:\\Downloads\\Models\\Evolution Vector Model\\未标题-1.psd";
-		File f = new File(fp);
-		pfr.read(f, aList);
-//		System.out.println(CollectionsUtils.toString(aList));
-		ImageLayer layer;
-		for (Iterator<ImageLayer> iterator = aList.iterator(); iterator.hasNext();) {
-			layer = (ImageLayer) iterator.next();
-			if (null != layer) {
-				System.out.println(layer.getProperties());
-			}
-		}
-	}
-
 	public List<ImageLayer> read(File file, List<ImageLayer> layerList) {
 		if (null != file && null != layerList) {
 			try {
-				Psd p = new Psd(file);
-				int lc = p.getLayersCount();
+				Psd psd = new Psd(file);
+				int layersCount = psd.getLayersCount();
 				Layer layer;
 				BufferedImage image;
 				File fileTemp;
 				float alpha;
 				int x;
 				int y;
+				boolean isVisible;
+				String name;
+				String suffix;
 				ImageLayer imageLayer;
-				for (int i = 0; i < lc; i++) {
-					layer = p.getLayer(i);
+//				for (int i = 0; i < layersCount; i++) {
+				for (int i = layersCount - 1; i >= 0; i--) {
+					layer = psd.getLayer(i);
 					if (null != layer) {
 						image = layer.getImage();
 						x = layer.getX();
 						y = layer.getY();
 						alpha = layer.getAlpha() / 255;
-						fileTemp = fileUtils.getFileReplace(file, i, ImageIOUtils.FileSuffixes_Default);
+						isVisible = layer.isVisible();
+						name = layer.toString();
+						if (name.isEmpty() || null == name) {
+							name = String.valueOf(i);
+						}
+						suffix = ImageIOUtils.FileSuffixes_Default;
+						fileTemp = fileUtils.getFileReplace(file, name, suffix);
 						imageLayer = new ImageLayer();
+						imageLayer.setName(name);
+						imageLayer.setSuffix(suffix);
 						imageLayer.setImage(image);
 						imageLayer.setImagePath(fileTemp.getPath());
 						imageLayer.setAlpha(alpha);
+						imageLayer.isVisible(isVisible);
 						imageLayer.setDepth(i);
 						imageLayer.setLocation(x, y);
 						imageLayer.setRotated(0);
