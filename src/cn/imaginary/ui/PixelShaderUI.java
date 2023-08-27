@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -103,10 +104,13 @@ public class PixelShaderUI extends JFrame {
 
 	private Color fgColor = Color.white;
 
-	private int fileFilterStyle_Image = 8;
+	private int fileFilterStyle_Preview = 1;
+	private int fileFilterStyle_Image = 2;
+	private int fileFilterStyle_Images = 3;
 	private int fileFilterStyle_Layer = 5;
+	private int fileFilterStyle_Layers = 6;
 	private int fileFilterStyle_Project = 0;
-	private int fileFilterStyle_PS = 2;
+	private int fileFilterStyle_PSD = 8;
 
 	private FileUtils fileUtils = FileUtils.getInstance();
 
@@ -121,7 +125,6 @@ public class PixelShaderUI extends JFrame {
 	private double indexScaledMax = 2;
 	private double indexScaledMin = 0.25;
 
-	private boolean isExport = false;
 	private boolean isLayerAction = false;
 	private boolean isLocationCenter;
 	private boolean isUpdate;
@@ -177,9 +180,13 @@ public class PixelShaderUI extends JFrame {
 
 	private DefaultMutableTreeNodeUtils treeNodeUtils = new DefaultMutableTreeNodeUtils();
 
+	private boolean isExportProject;
+
+	private Properties propertiesProject;
+
 	public PixelShaderUI() {
 		super();
-		setTitle("PixelShader ver.61.2e10.b31e_alpha by Sev末夜");
+		setTitle("PixelShader ver.66.6h16.bf3a_alpha by Sev末夜");
 		initGUI();
 	}
 
@@ -309,26 +316,6 @@ public class PixelShaderUI extends JFrame {
 		}
 	}
 
-	private void exportImages(List<ImageLayer> layerList, File file) {
-		if (null != layerList && !layerList.isEmpty()) {
-			ImageLayer layer;
-			BufferedImage image;
-			File fileImage;
-			for (Iterator<ImageLayer> iterator = layerList.iterator(); iterator.hasNext();) {
-				layer = iterator.next();
-				if (null != layer) {
-					if (null == file) {
-						fileImage = new File(layer.getImagePath());
-					} else {
-						fileImage = fileUtils.getFile(file, layer.getDepth(), ImageIOUtils.FileSuffixes_Default);
-					}
-					image = layer.getImage();
-					imageExport(image, fileImage);
-				}
-			}
-		}
-	}
-
 	private Comparator<ImageLayer> getComparatorByLayerDepth() {
 		Comparator<ImageLayer> comparator = new Comparator<ImageLayer>() {
 
@@ -387,6 +374,10 @@ public class PixelShaderUI extends JFrame {
 		description.append("3.1 【鼠标】点击（选中）图层节点，右键点击此节点（child.png）；");
 		description.append(ln);
 		description.append("ps：删除图层仅移除树状列表节点内容，且所有操作不改动原始图形文件。");
+		description.append(ln);
+		description.append("4. PSD解除图层分组再导入：");
+		description.append(ln);
+		description.append("4.1 根据Adobe公司公布的PSD文件格式规范说明书，所开发的相关PSD库都存在图层分组读取冲突；");
 		return description.toString();
 	}
 
@@ -410,9 +401,9 @@ public class PixelShaderUI extends JFrame {
 		description.append(ln);
 		description.append("author:Sev末夜");
 		description.append(ln);
-		description.append("ver.68.6e15.p020_alpha");
+		description.append("ver.66.6h16.bf3a_alpha");
 		description.append(ln);
-		description.append("new:工程文件xml规范化；");
+		description.append("new:psd图层信息读取修复，UI主题显示更新磁贴效果；");
 		description.append(ln);
 		description.append("ver.61.2e10.p31e_alpha");
 		description.append(ln);
@@ -468,6 +459,7 @@ public class PixelShaderUI extends JFrame {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		{
 			JMenuBar jMenuBar = new JMenuBar();
+			jMenuBar.setBackground(Color.white);
 			{
 				JMenu jMenu = new JMenu();
 				jMenu.setText("文件<File>");
@@ -481,7 +473,6 @@ public class PixelShaderUI extends JFrame {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(JMenuItemNew.getText());
 							setImageLayerInfo(null);
 							createNewProject();
 							drawResources();
@@ -495,15 +486,12 @@ public class PixelShaderUI extends JFrame {
 					jMenuInport.setText("导入<Inport>");
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("添加PNG到图层");
-//						jMenuItem.setMnemonic(KeyEvent.VK_I);
+						jMenuItem.setText("添加Png");
 						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('i'));
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
 								File[] array = openFiles(fileFilterStyle_Image);
 								if (null != array) {
 									loadLayer(Arrays.asList(array));
@@ -514,20 +502,18 @@ public class PixelShaderUI extends JFrame {
 						jMenuInport.add(jMenuItem);
 					}
 					{
+
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("添加Layer到图层");
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+						jMenuItem.setText("添加Layer");
 						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('o'));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
 								File[] array = openFiles(fileFilterStyle_Layer);
 								if (null != array) {
 									loadLayer(Arrays.asList(array));
 								}
-//								drawResources();
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -535,19 +521,16 @@ public class PixelShaderUI extends JFrame {
 					}
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("添加工程到图层");
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK));
+						jMenuItem.setText("添加工程");
 						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('p'));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
 								File[] array = openFiles(fileFilterStyle_Project);
 								if (null != array) {
 									loadLayer(Arrays.asList(array));
 								}
-//								drawResources();
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -555,15 +538,13 @@ public class PixelShaderUI extends JFrame {
 					}
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("添加PSD到图层");
+						jMenuItem.setText("添加PSD");
 						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('u'));
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_DOWN_MASK));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
-								loadPsdLayer(openFiles(fileFilterStyle_PS));
+								loadPsdLayer(openFiles(fileFilterStyle_PSD));
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -576,17 +557,15 @@ public class PixelShaderUI extends JFrame {
 					jMenuExport.setText("导出<Export>");
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("图层合并为PNG");
-						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('e'));
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
+						jMenuItem.setText("图层预览");
+						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('1'));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
 								String description;
 								if (null != layerListRoot && layerListRoot.size() != 0) {
-									storeResources(openFiles(fileFilterStyle_Image), 8);
+									storeResources(fileFilterStyle_Preview);
 									description = "操作完成！";
 								} else {
 									description = "项目为空！";
@@ -599,15 +578,20 @@ public class PixelShaderUI extends JFrame {
 					}
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("图层导出为文件");
-						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('w'));
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK));
+						jMenuItem.setText("选中图层为Png");
+						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('2'));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
-								storeImages(false);
+								String description;
+								if (null != layerListRoot && layerListRoot.size() != 0) {
+									storeResources(fileFilterStyle_Image);
+									description = "操作完成！";
+								} else {
+									description = "项目为空！";
+								}
+								JOptionPane.showMessageDialog(null, description);
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -615,18 +599,36 @@ public class PixelShaderUI extends JFrame {
 					}
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("图层导出为Layer");
+						jMenuItem.setText("全部图层为Pngs");
+						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('3'));
+						ActionListener al = new ActionListener() {
+
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								String description;
+								if (null != layerListRoot && layerListRoot.size() != 0) {
+									storeResources(fileFilterStyle_Images);
+									description = "操作完成！";
+								} else {
+									description = "项目为空！";
+								}
+								JOptionPane.showMessageDialog(null, description);
+							}
+						};
+						jMenuItem.addActionListener(al);
+						jMenuExport.add(jMenuItem);
+					}
+					{
+						JMenuItem jMenuItem = new JMenuItem();
+						jMenuItem.setText("选中图层Layer");
 						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('q'));
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
 								String description;
 								if (null != layerListRoot && layerListRoot.size() != 0) {
-//									storeLayers();
-									storeLayer();
+									storeResources(fileFilterStyle_Layer);
 									description = "操作完成！";
 								} else {
 									description = "项目为空！";
@@ -639,14 +641,20 @@ public class PixelShaderUI extends JFrame {
 					}
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("图层导出为PSD");
-						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('r'));
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
+						jMenuItem.setText("全部图层为Layers");
+						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('w'));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
+								String description;
+								if (null != layerListRoot && layerListRoot.size() != 0) {
+									storeResources(fileFilterStyle_Layers);
+									description = "操作完成！";
+								} else {
+									description = "项目为空！";
+								}
+								JOptionPane.showMessageDialog(null, description);
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -654,15 +662,14 @@ public class PixelShaderUI extends JFrame {
 					}
 					{
 						JMenuItem jMenuItem = new JMenuItem();
-						jMenuItem.setText("工程导出为文件");
-						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('t'));
-//						jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK));
+						jMenuItem.setText("图层为PSD");
+						jMenuItem.setAccelerator(KeyStroke.getKeyStroke('e'));
 						ActionListener al = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-//								System.out.println(jMenuItem.getText());
-//								storeImages(true);
+								String description = "功能暂未添加";
+								JOptionPane.showMessageDialog(null, description);
 							}
 						};
 						jMenuItem.addActionListener(al);
@@ -673,13 +680,11 @@ public class PixelShaderUI extends JFrame {
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("打开工程");
-//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK));
 					jMenuItem.setAccelerator(KeyStroke.getKeyStroke('0'));
 					ActionListener al = new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
 							createNewProject();
 							File[] array = openFiles(fileFilterStyle_Project);
 							if (null != array) {
@@ -693,16 +698,14 @@ public class PixelShaderUI extends JFrame {
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("保存工程");
-//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));
 					jMenuItem.setAccelerator(KeyStroke.getKeyStroke('1'));
 					ActionListener al = new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
 							String description;
 							if (null != layerListRoot && layerListRoot.size() != 0) {
-								storeResources(openFiles(fileFilterStyle_Project), 0);
+								storeResources(fileFilterStyle_Project);
 								description = "操作完成！";
 							} else {
 								description = "项目为空！";
@@ -716,12 +719,10 @@ public class PixelShaderUI extends JFrame {
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("退出");
-//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.CTRL_DOWN_MASK));
 					ActionListener al = new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
 							warning();
 							System.exit(0);
 						}
@@ -772,7 +773,6 @@ public class PixelShaderUI extends JFrame {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
 							if (null != layerListRoot && layerListRoot.size() != 0) {
 								if (!isLocationCenter && jCheckBoxMenuItemCenter.isSelected()) {
 									isLocationCenter = true;
@@ -792,12 +792,10 @@ public class PixelShaderUI extends JFrame {
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("指南");
-//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
 					ActionListener al = new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
 							Object description = getHelpInfo();
 							String title = "操作指南：";
 							JOptionPane.showMessageDialog(null, description, title, 0);
@@ -809,12 +807,10 @@ public class PixelShaderUI extends JFrame {
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("关于");
-//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
 					ActionListener al = new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
 							Object description = getProjectInfo();
 							String title = "项目仓库：";
 							JOptionPane.showMessageDialog(null, description, title, 0);
@@ -826,12 +822,10 @@ public class PixelShaderUI extends JFrame {
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("版本");
-//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
 					ActionListener al = new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
 							Object description = getVersionInfo();
 							String title = "更新日志：";
 							JOptionPane.showMessageDialog(null, description, title, 0);
@@ -847,10 +841,12 @@ public class PixelShaderUI extends JFrame {
 		{
 
 			JPanel jPanelMain = new JPanel();
+			jPanelMain.setBackground(Color.black);
 			jPanelMain.setLayout(new BorderLayout());
 			{
 				{
 					JPanel jPanel = new JPanel();
+					jPanel.setBackground(Color.red);
 					jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
 					{
 						Dimension dimensionJTextField = new Dimension(64, 24);
@@ -1111,6 +1107,7 @@ public class PixelShaderUI extends JFrame {
 				}
 				{
 					JPanel jPanel = new JPanel();
+					jPanel.setBackground(Color.cyan);
 					jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
 					{
 						{
@@ -1158,8 +1155,6 @@ public class PixelShaderUI extends JFrame {
 					cardLayout = new CardLayout(0, 0);
 					jPanelCard.setLayout(cardLayout);
 					{
-//					JScrollPane jScrollPane = new JScrollPane();
-//					{
 						jPanelGraphics = new JPanel();
 						jPanelGraphics.setBackground(bgColor);
 						jPanelGraphics.setForeground(fgColor);
@@ -1207,7 +1202,6 @@ public class PixelShaderUI extends JFrame {
 							private double xOld;
 							private double yNew;
 							private double yOld;
-//							private String tag_slash = "/";
 
 							@Override
 							public void mouseClicked(MouseEvent e) {
@@ -1282,9 +1276,6 @@ public class PixelShaderUI extends JFrame {
 							}
 						};
 						jPanelGraphics.addMouseListener(ml);
-//						jScrollPane.getViewport().setView(jPanelGraphics);
-//					}
-//					jPanelMain.add(jScrollPane, BorderLayout.CENTER);
 						jPanelCard.add(jPanelGraphics, cardGraphics);
 					}
 					{
@@ -1295,6 +1286,7 @@ public class PixelShaderUI extends JFrame {
 				}
 				{
 					JPanel jPanel = new JPanel();
+					jPanel.setBackground(Color.darkGray);
 					jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
 					{
 						JToolBar jToolBar = new JToolBar();
@@ -1316,7 +1308,6 @@ public class PixelShaderUI extends JFrame {
 										jTreeRoot.setShowsRootHandles(true);
 										jTreeRoot.setDragEnabled(true);
 										jTreeRoot.setEditable(false);
-//										jTreeUtils.setRootVisible(false);
 										DefaultTreeModel treeModelRoot = new DefaultTreeModel(treeNodeRoot);
 										jTreeRoot.setModel(treeModelRoot);
 										treeCellRenderer = new DefaultTreeCellRendererUtils();
@@ -1461,6 +1452,7 @@ public class PixelShaderUI extends JFrame {
 				}
 				{
 					JPanel jPanel = new JPanel();
+					jPanel.setBackground(Color.blue);
 					jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
 					{
 						Dimension dimensionJTextField = new Dimension(64, 24);
@@ -1476,7 +1468,6 @@ public class PixelShaderUI extends JFrame {
 								jTextFieldCanvasX.setMaximumSize(dimensionJTextField);
 								jTextFieldCanvasX.setText(String.valueOf(jPanelGraphics.getWidth()));
 								jTextFieldCanvasX.setText("默认");
-//								jTextFieldCanvasX.setEnabled(false);
 								jToolBar.add(jTextFieldCanvasX);
 							}
 							{
@@ -1489,7 +1480,6 @@ public class PixelShaderUI extends JFrame {
 								jTextFieldCanvasY.setMaximumSize(dimensionJTextField);
 								jTextFieldCanvasY.setText(String.valueOf(jPanelGraphics.getHeight()));
 								jTextFieldCanvasY.setText("默认");
-//								jTextFieldCanvasY.setEnabled(false);
 								jToolBar.add(jTextFieldCanvasY);
 							}
 							{
@@ -1545,7 +1535,6 @@ public class PixelShaderUI extends JFrame {
 								jLabelView = new JLabel();
 								jLabelView.setMaximumSize(dimensionJTextField);
 								jLabelView.setText("1倍");
-//								jLabelView.setEnabled(false);
 								jToolBar.add(jLabelView);
 							}
 							{
@@ -1733,6 +1722,7 @@ public class PixelShaderUI extends JFrame {
 		int width = 1080;
 		int height = 720;
 		Dimension size = new Dimension(width, height);
+
 		setSize(size);
 		setResizable(false);
 		setLocationRelativeTo(null);
@@ -1764,8 +1754,11 @@ public class PixelShaderUI extends JFrame {
 
 	private void layerExport(File file, ImageLayer layer) {
 		if (null != layer) {
+			if (null == propertiesProject) {
+				propertiesProject = new Properties();
+			}
 			File imageFile;
-			File propFile;
+			File propFile = null;
 			String imagePath;
 			Properties prop;
 			PropertiesUtils pu = new PropertiesUtils();
@@ -1774,63 +1767,79 @@ public class PixelShaderUI extends JFrame {
 			imagePath = layer.getImagePath();
 			if (null != imagePath) {
 				imageFile = new File(imagePath);
-				if (!imageFile.exists()) {
-					imageExport(layer.getImage(), imageFile);
-				}
 				if (null == file) {
 					file = imageFile;
 				}
 				if (null != file && null != prop) {
+					File temp;
+					if (file.isDirectory()) {
+						temp = file;
+					} else {
+						temp = file.getParentFile();
+					}
+					file = new File(temp, imageFile.getName());
 					propFile = getFileLayer(file);
 					propertiesUtils.storePropertiesXml(prop, propFile, tag_suffixes_layer, commentLayer,
 							encoding_default);
+					if (isExportProject) {
+						propertiesProject.put(layer.getObject(), prop);
+					}
 				}
 			}
 		}
 	}
 
-	private void layerExport(File file, List<ImageLayer> layerList, boolean isExportProject) {
+	private void layerExport(File file, List<ImageLayer> layerList) {
 		if (null != layerList) {
 			ImageLayer layer;
-			Properties properties = new Properties();
-			File imageFile;
-			File propFile;
-			String imagePath;
+			if (null == propertiesProject) {
+				propertiesProject = new Properties();
+			}
 			Properties prop;
-			PropertiesUtils pu = new PropertiesUtils();
-			String commentLayer = "ImageLayer";
 			for (Iterator<ImageLayer> iterator = layerList.iterator(); iterator.hasNext();) {
 				layer = iterator.next();
 				if (null != layer) {
-					imagePath = layer.getImagePath();
-					prop = pu.getPropertiesString(layer.getProperties());
-					if (null != imagePath) {
-						imageFile = new File(imagePath);
-						if (!imageFile.exists()) {
-							imageExport(layer.getImage(), imageFile);
-						}
-						if (null == file) {
-							file = imageFile;
-						}
-						propFile = getFileLayer(file);
-						if (null != prop) {
-							propertiesUtils.storePropertiesXml(prop, propFile, tag_suffixes_layer, commentLayer,
-									encoding_default);
-							if (isExportProject) {
-								properties.put(layer.getObject(), prop);
-							}
-						}
-					}
+					layerExport(file, layer);
 				}
 			}
 			if (null != file && isExportProject) {
 				String commentProject = "PixelShader Project";
 				prop = treeModelUtils.storeNode((DefaultTreeModel) jTreeRoot.getModel());
-				properties = updateProperties(prop, properties);
-				propertiesUtils.storePropertiesXml(properties, getFileProject(file), tag_suffixes_project,
+				propertiesProject = updateProperties(prop, propertiesProject);
+				propertiesUtils.storePropertiesXml(propertiesProject, getFileProject(file), tag_suffixes_project,
 						commentProject, encoding_default);
 			}
 		}
+	}
+
+	private Properties updateProperties(Properties src, Properties dest) {
+		if (null != src && null != dest) {
+			Set<Object> kset = src.keySet();
+			Object key;
+			Object value;
+			LayerNode node;
+			Object object;
+			Properties properties = new Properties();
+			for (Iterator<Object> iterator = kset.iterator(); iterator.hasNext();) {
+				key = iterator.next();
+				if (null != key) {
+					value = src.get(key);
+					if (null != value && value instanceof LayerNode) {
+						node = (LayerNode) value;
+						object = node.getObject();
+						if (null != object) {
+							value = dest.get(object);
+							if (null != value) {
+								key = node;
+								properties.put(key, value);
+							}
+						}
+					}
+				}
+			}
+			return properties;
+		}
+		return null;
 	}
 
 	private void layerTransform(ImageLayer imageLayer, double x, double y, double rotate) {
@@ -1956,7 +1965,6 @@ public class PixelShaderUI extends JFrame {
 		if (null != array) {
 			PSDFileReader psdFileReader = new PSDFileReader();
 			List<ImageLayer> layerList = new ArrayList<>();
-//			List<ImageLayer> layerList = new LinkedList<>();
 			for (int i = 0, iLength = array.length; i < iLength; i++) {
 				layerList = psdFileReader.read(array[i], layerList);
 			}
@@ -1973,13 +1981,14 @@ public class PixelShaderUI extends JFrame {
 		jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		FileNameExtensionFilter filter = null;
 		jFileChooser.resetChoosableFileFilters();
-		if (filterStyle == 8) {
+		if (filterStyle == fileFilterStyle_Image || filterStyle == fileFilterStyle_Images
+				|| filterStyle == fileFilterStyle_Preview) {
 			filter = new FileNameExtensionFilter("Images", "bmp", "jpg", "gif", "png");
-		} else if (filterStyle == 5) {
+		} else if (filterStyle == fileFilterStyle_Layer || filterStyle == fileFilterStyle_Layers) {
 			filter = new FileNameExtensionFilter("PixelShader ImageLayer", "pxl");
-		} else if (filterStyle == 2) {
+		} else if (filterStyle == fileFilterStyle_PSD) {
 			filter = new FileNameExtensionFilter("Photoshop Document", "psd");
-		} else if (filterStyle == 0) {
+		} else if (filterStyle == fileFilterStyle_Project) {
 			filter = new FileNameExtensionFilter("EvolutionVector Project", "evp");
 		}
 		jFileChooser.setFileFilter(filter);
@@ -2005,8 +2014,6 @@ public class PixelShaderUI extends JFrame {
 			if (treeNode.getChildCount() != 0) {
 				DefaultMutableTreeNode node;
 				for (@SuppressWarnings("unchecked")
-//			Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNodeSelected
-//			.children(); treeNodeEnumeration.hasMoreElements();) {
 				Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNode
 						.preorderEnumeration(); treeNodeEnumeration.hasMoreElements();) {
 					node = treeNodeEnumeration.nextElement();
@@ -2215,70 +2222,67 @@ public class PixelShaderUI extends JFrame {
 		}
 	}
 
-	private void storeImages(boolean isFinal) {
-		if (!isExport) {
-			isExport = true;
-		}
-		drawResources();
-		if (isFinal) {
-//			exportImagesFinal(layerListRoot, null);
-		} else {
-			File[] array = openFiles(fileFilterStyle_Image);
-			exportImages(layerListRoot, array[0]);
-		}
-	}
-
-	private void storeLayer() {
+	private void imagesExport(File file) {
 		if (null != layerListRoot) {
-			File[] array = openFiles(fileFilterStyle_Layer);
-			layerExport(array[0], imageLayerSelected);
+			ImageLayer imageLayer;
+			File temp;
+			for (Iterator<ImageLayer> iterator = layerListRoot.iterator(); iterator.hasNext();) {
+				imageLayer = iterator.next();
+				if (null != imageLayer) {
+					temp = new File(imageLayer.getImagePath());
+					if (file.isFile()) {
+						file = file.getParentFile();
+					}
+					temp.renameTo(new File(file, temp.getName()));
+					imageExport(imageLayer.getImage(), temp);
+				}
+			}
 		}
+
 	}
 
-	private void storeResources(File[] fileArray, int style) {
+	private void storeResources(int filterStyle) {
+		File[] fileArray = openFiles(filterStyle);
 		if (null == fileArray) {
 			return;
 		}
 		File file = fileArray[0];
-		File dir;
-		if (!file.isDirectory()) {
-			dir = file.getParentFile();
-		} else {
-			dir = file;
-		}
+		File dir = file.getParentFile();
 		if (null == dir) {
 			return;
 		}
-		File tempFile;
-		String fileName;
-		if (style == fileFilterStyle_Image) {
+		if (filterStyle == fileFilterStyle_Images) {
+			imagesExport(dir);
+		} else if (filterStyle == fileFilterStyle_Layers) {
+			isExportProject = false;
+			layerExport(file, layerListRoot);
+		} else if (filterStyle == fileFilterStyle_Preview) {
+
 			Calendar calendar = new GregorianCalendar();
 			StringBuffer sbuf = new StringBuffer();
 			sbuf.append("layerCombined-");
-//			sbuf.append(calendar.get(Calendar.YEAR));
-//			sbuf.append(calendar.get(Calendar.MONTH));
+//				sbuf.append(calendar.get(Calendar.YEAR));
+//				sbuf.append(calendar.get(Calendar.MONTH));
 			sbuf.append(calendar.get(Calendar.DAY_OF_MONTH));
 			sbuf.append(calendar.get(Calendar.HOUR_OF_DAY));
 			sbuf.append(calendar.get(Calendar.MINUTE));
 			sbuf.append(calendar.get(Calendar.SECOND));
 			sbuf.append(calendar.get(Calendar.MILLISECOND));
 			sbuf.append(tag_suffixes_image);
-			fileName = sbuf.toString();
-			tempFile = new File(dir, fileName);
 			if (null != layerImage) {
-				imageExport(layerImage, tempFile);
+				imageExport(layerImage, new File(dir, sbuf.toString()));
 			}
-		}
-//		else if (style == fileFilterStyle_PS) {
-////			psd
-//		}
-		else if (style == fileFilterStyle_Project) {
-			if (null != layerListRoot) {
-				layerExport(file, layerListRoot, true);
-			}
-		}
-		if (isExport) {
-			isExport = false;
+		} else if (filterStyle == fileFilterStyle_Image) {
+			File temp = new File(imageLayerSelected.getImagePath());
+			imageExport(imageLayerSelected.getImage(), new File(dir, temp.getName()));
+		} else if (filterStyle == fileFilterStyle_Layer) {
+			layerExport(file, imageLayerSelected);
+		} else if (filterStyle == fileFilterStyle_Project) {
+			isExportProject = true;
+			imagesExport(dir);
+			layerExport(file, layerListRoot);
+		} else if (filterStyle == fileFilterStyle_PSD) {
+
 		}
 	}
 
@@ -2399,11 +2403,22 @@ public class PixelShaderUI extends JFrame {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private Comparator<LayerNode> getComparatorByProperties() {
+		Comparator<? super LayerNode> comparator = new Comparator<LayerNode>() {
+
+			@Override
+			public int compare(LayerNode o1, LayerNode o2) {
+				return o1.getID() - o2.getID();
+			}
+		};
+		return (Comparator<LayerNode>) comparator;
+	}
+
 	private List<ImageLayer> updateListLayer(List<ImageLayer> layerList, List<File> fileList) {
 		if (null != fileList) {
 			if (null == layerList) {
 				layerList = new ArrayList<>();
-//				layerList = new LinkedList<>();
 			}
 			File file;
 			ImageLayer imageLayer;
@@ -2412,7 +2427,6 @@ public class PixelShaderUI extends JFrame {
 			String imagePath = "imagePath";
 			Properties propLayer;
 			Properties prop = null;
-			Object object;
 			LayerNode node;
 			for (Iterator<File> iterator = fileList.iterator(); iterator.hasNext();) {
 				file = iterator.next();
@@ -2423,29 +2437,35 @@ public class PixelShaderUI extends JFrame {
 						if (null != propLayer) {
 							isUpdate = true;
 							modelProperties = new Properties();
-							for (Iterator<Object> iteratorKeys = propLayer.keySet().iterator(); iteratorKeys
-									.hasNext();) {
-								object = iteratorKeys.next();
-								if (null != object) {
-									if (object instanceof String) {
-										object = objectUtils.getObject((String) object);
-									}
-									if (object instanceof LayerNode) {
-										node = (LayerNode) object;
-										modelProperties.put(node.getID(), node);
+							Set<Object> keySet = propLayer.keySet();
+							Object key;
+							Object value;
+							TreeSet<LayerNode> treeSet = new TreeSet<>(getComparatorByProperties());
+							for (Iterator<Object> iteratorKey = keySet.iterator(); iteratorKey.hasNext();) {
+								key = iteratorKey.next();
+								if (null != key && key instanceof String) {
+									key = objectUtils.getObject((String) key);
+									if (null != key && key instanceof LayerNode) {
+										treeSet.add((LayerNode) key);
 									}
 								}
 							}
-							for (Iterator<Object> iteratorValues = propLayer.values().iterator(); iteratorValues
-									.hasNext();) {
-								object = iteratorValues.next();
-								if (null != object) {
-									if (null != object) {
-										if (object instanceof String) {
-											object = objectUtils.getProperties((String) object);
+//							System.out.println(Arrays.toString(treeSet.toArray()));
+							for (Iterator<LayerNode> iteratorTree = treeSet.iterator(); iteratorTree.hasNext();) {
+								key = iteratorTree.next();
+								if (null != key) {
+									key = key.toString();
+									value = propLayer.get(key);
+									if (key instanceof LayerNode) {
+										node = (LayerNode) key;
+										modelProperties.put(node.getID(), node);
+									}
+									if (null != value) {
+										if (value instanceof String) {
+											value = objectUtils.getProperties((String) value);
 										}
-										if (object instanceof Properties) {
-											prop = (Properties) object;
+										if (value instanceof Properties) {
+											prop = (Properties) value;
 											file = fileUtils.getFile(fileList, prop.getProperty(imagePath));
 											if (null == file) {
 												imageLayer = new ImageLayer();
@@ -2470,11 +2490,13 @@ public class PixelShaderUI extends JFrame {
 							}
 						}
 					} else {
-						layer = fileUtils.getImageLayer(layerList, file);
-						if (null == layer) {
-							imageLayer = new ImageLayer();
-							imageLayer.read(file);
-							layerList.add(imageLayer);
+						if (isImageFile(fileName)) {
+							layer = fileUtils.getImageLayer(layerList, file);
+							if (null == layer) {
+								imageLayer = new ImageLayer();
+								imageLayer.read(file);
+								layerList.add(imageLayer);
+							}
 						}
 					}
 				}
@@ -2483,34 +2505,14 @@ public class PixelShaderUI extends JFrame {
 		return layerList;
 	}
 
-	private Properties updateProperties(Properties src, Properties dest) {
-		if (null != src && null != dest) {
-			Set<Object> kset = src.keySet();
-			Object key;
-			Object value;
-			LayerNode node;
-			Object object;
-			Properties properties = new Properties();
-			for (Iterator<Object> iterator = kset.iterator(); iterator.hasNext();) {
-				key = iterator.next();
-				if (null != key) {
-					value = src.get(key);
-					if (null != value && value instanceof LayerNode) {
-						node = (LayerNode) value;
-						object = node.getObject();
-						if (null != object) {
-							value = dest.get(object);
-							if (null != value) {
-								key = node;
-								properties.put(key, value);
-							}
-						}
-					}
-				}
+	private boolean isImageFile(String filePath) {
+		if (null != filePath) {
+			String temp = filePath.toLowerCase();
+			if (temp.endsWith(".png") || temp.endsWith(".jpg") || temp.endsWith(".bmp") || temp.endsWith(".jpeg")) {
+				return true;
 			}
-			return properties;
 		}
-		return null;
+		return false;
 	}
 
 	private void updateResources(JTree jTree) {
@@ -2525,9 +2527,10 @@ public class PixelShaderUI extends JFrame {
 			int depth;
 			int depthMax = fileUtils.getImageLayerDepthMax(layerListRoot) + 1;
 			int index;
-			for (@SuppressWarnings("unchecked")
+//			for (@SuppressWarnings("unchecked")
 //			Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNodeRoot
 //			.preorderEnumeration(); treeNodeEnumeration.hasMoreElements();) {
+			for (@SuppressWarnings("unchecked")
 			Enumeration<DefaultMutableTreeNode> treeNodeEnumeration = treeNodeRoot
 					.breadthFirstEnumeration(); treeNodeEnumeration.hasMoreElements();) {
 				treeNode = treeNodeEnumeration.nextElement();
@@ -2580,7 +2583,8 @@ public class PixelShaderUI extends JFrame {
 						pathName = file.getName();
 						node.setUserObject(pathName);
 						if (!isTreeNodeChild(nodeRoot, node)) {
-							treeModel.insertNodeInto(node, nodeRoot, 0);
+//							treeModel.insertNodeInto(node, nodeRoot, 0);
+							treeModel.insertNodeInto(node, nodeRoot, nodeRoot.getChildCount());
 							treeModel.nodeChanged(nodeRoot);
 						}
 					}
@@ -2598,7 +2602,7 @@ public class PixelShaderUI extends JFrame {
 		int messageStyle = JOptionPane.showConfirmDialog(null, description);// yes=0;no=1;cancel=2
 		if (messageStyle == 0) {
 			if (null != layerListRoot && layerListRoot.size() != 0) {
-				storeResources(openFiles(fileFilterStyle_Project), 0);
+				storeResources(fileFilterStyle_Project);
 				description = "操作完成！";
 			} else {
 				description = "项目为空！";
