@@ -64,7 +64,7 @@ import cn.imaginary.toolkit.swing.tree.LayerNode;
 import javaev.awt.DimensionUtils;
 import javaev.awt.Graphics2DUtils;
 import javaev.awt.PointUtils;
-
+import javaev.awt.RectangleUtils;
 import javaev.imageio.ImageIOUtils;
 
 import javaev.io.FileNameMapUtils;
@@ -187,6 +187,8 @@ public class PixelShaderUI extends JFrame {
 
 	private Properties propertiesProject;
 
+	private RectangleUtils layerListRootRectangleMin;
+
 	public PixelShaderUI() {
 		super();
 		setTitle("PixelShader ver.66.6h16.bf3a_alpha by Sev末夜");
@@ -226,8 +228,13 @@ public class PixelShaderUI extends JFrame {
 				widthRoot = canvas.width;
 				heightRoot = canvas.height;
 			} else {
-				widthRoot = jPanel.getWidth();
-				heightRoot = jPanel.getHeight();
+				if (null == layerListRootRectangleMin) {
+					widthRoot = jPanel.getWidth();
+					heightRoot = jPanel.getHeight();
+				} else {
+					widthRoot = layerListRootRectangleMin.width + layerListRootRectangleMin.x;
+					heightRoot = layerListRootRectangleMin.height + layerListRootRectangleMin.y;
+				}
 				canvas = new DimensionUtils();
 				canvas.setSize(widthRoot, heightRoot);
 			}
@@ -311,6 +318,7 @@ public class PixelShaderUI extends JFrame {
 
 	private void drawResources() {
 		if (null != jPanelGraphics && null != layerListRoot) {
+			layerListRootRectangleMin = fileUtils.getImageLayersRectangleMin(layerListRoot);
 			treeCellRenderer.setResourcesList(layerListRoot);
 			updateResources(jTreeRoot);
 			Comparator<ImageLayer> comparator = getComparatorByLayerDepth();
@@ -1154,9 +1162,7 @@ public class PixelShaderUI extends JFrame {
 					jPanelMain.add(jPanel, BorderLayout.WEST);
 				}
 				{
-					JPanel jPanelCard = new JPanel();
-					cardLayout = new CardLayout(0, 0);
-					jPanelCard.setLayout(cardLayout);
+					JScrollPane jScrollPane = new JScrollPane();
 					{
 						jPanelGraphics = new JPanel();
 						jPanelGraphics.setBackground(bgColor);
@@ -1164,7 +1170,7 @@ public class PixelShaderUI extends JFrame {
 						int width = 1024;
 						int height = 1024;
 						Dimension dimension = new Dimension(width, height);
-						jPanelGraphics.setSize(dimension);
+						jPanelGraphics.setPreferredSize(dimension);
 						MouseWheelListener mwl = new MouseWheelListener() {
 
 							@Override
@@ -1279,13 +1285,9 @@ public class PixelShaderUI extends JFrame {
 							}
 						};
 						jPanelGraphics.addMouseListener(ml);
-						jPanelCard.add(jPanelGraphics, cardGraphics);
+						jScrollPane.getViewport().setView(jPanelGraphics);
 					}
-					{
-						JPanel jPanelEditor = new JPanel();
-						jPanelCard.add(jPanelEditor, cardEditor);
-					}
-					jPanelMain.add(jPanelCard, BorderLayout.CENTER);
+					jPanelMain.add(jScrollPane, BorderLayout.CENTER);
 				}
 				{
 					JPanel jPanel = new JPanel();
@@ -2260,7 +2262,6 @@ public class PixelShaderUI extends JFrame {
 			isExportProject = false;
 			layerExport(file, layerListRoot);
 		} else if (filterStyle == fileFilterStyle_Preview) {
-
 			Calendar calendar = new GregorianCalendar();
 			StringBuffer sbuf = new StringBuffer();
 			sbuf.append("layerCombined-");
@@ -2273,6 +2274,8 @@ public class PixelShaderUI extends JFrame {
 			sbuf.append(calendar.get(Calendar.MILLISECOND));
 			sbuf.append(tag_suffixes_image);
 			if (null != layerImage) {
+				layerImage = layerImage.getSubimage(layerListRootRectangleMin.x, layerListRootRectangleMin.y,
+						layerListRootRectangleMin.width, layerListRootRectangleMin.height);
 				imageExport(layerImage, new File(dir, sbuf.toString()));
 			}
 		} else if (filterStyle == fileFilterStyle_Image) {
