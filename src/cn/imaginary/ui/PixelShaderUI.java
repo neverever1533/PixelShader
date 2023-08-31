@@ -191,7 +191,7 @@ public class PixelShaderUI extends JFrame {
 
 	public PixelShaderUI() {
 		super();
-		setTitle("PixelShader ver.68.9h1e.b91c_alpha by Sev末夜");
+		setTitle("PixelShader ver.69.2h1f.b620_alpha by Sev末夜");
 		initGUI();
 	}
 
@@ -425,6 +425,10 @@ public class PixelShaderUI extends JFrame {
 		description.append(ln);
 		description.append("author:Sev末夜");
 		description.append(ln);
+		description.append("ver.69.2h1f.b620_alpha");
+		description.append(ln);
+		description.append("new:修正图片、图层、工程文件导出；");
+		description.append(ln);
 		description.append("ver.68.9h1e.b91c_alpha");
 		description.append(ln);
 		description.append("new:图层导出可选是否裁切边框，工程图层属性信息存储优化，图层加入哈希值精准定位防覆盖；");
@@ -495,8 +499,9 @@ public class PixelShaderUI extends JFrame {
 		if (null != layerListRoot) {
 			ImageLayer imageLayer;
 			File temp;
+			String path;
 			if (isDrawCanvas) {
-				if (!file.isDirectory()) {
+				if (file.isFile()) {
 					file = file.getParentFile();
 				}
 				file = new File(file, tag_Canvas);
@@ -507,12 +512,18 @@ public class PixelShaderUI extends JFrame {
 			for (Iterator<ImageLayer> iterator = layerListRoot.iterator(); iterator.hasNext();) {
 				imageLayer = iterator.next();
 				if (null != imageLayer) {
-					temp = new File(imageLayer.getImagePath());
-					if (file.isFile()) {
-						file = file.getParentFile();
+					path = imageLayer.getImagePath();
+					if (null != path) {
+						temp = new File(path);
+						if (file.isFile()) {
+							file = file.getParentFile();
+						}
+						temp = new File(file, temp.getName());
+						imageLayer.setImagePath(temp.getAbsolutePath());
+						if (!temp.exists()) {
+							imageExport(imageLayer.getImage(), imageLayer.getLocation(), temp);
+						}
 					}
-					temp = new File(file, temp.getName());
-					imageExport(imageLayer.getImage(), imageLayer.getLocation(), temp);
 				}
 			}
 		}
@@ -803,29 +814,29 @@ public class PixelShaderUI extends JFrame {
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("画布");
-					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
-					ActionListener al = new ActionListener() {
-
-						@Override
-						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
-						}
-					};
-					jMenuItem.addActionListener(al);
+//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
+//					ActionListener al = new ActionListener() {
+//
+//						@Override
+//						public void actionPerformed(ActionEvent e) {
+////							System.out.println(jMenuItem.getText());
+//						}
+//					};
+//					jMenuItem.addActionListener(al);
 					jMenu.add(jMenuItem);
 				}
 				{
 					JMenuItem jMenuItem = new JMenuItem();
 					jMenuItem.setText("视图");
-					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK));
-					ActionListener al = new ActionListener() {
-
-						@Override
-						public void actionPerformed(ActionEvent e) {
-//							System.out.println(jMenuItem.getText());
-						}
-					};
-					jMenuItem.addActionListener(al);
+//					jMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK));
+//					ActionListener al = new ActionListener() {
+//
+//						@Override
+//						public void actionPerformed(ActionEvent e) {
+////							System.out.println(jMenuItem.getText());
+//						}
+//					};
+//					jMenuItem.addActionListener(al);
 					jMenu.add(jMenuItem);
 				}
 				{
@@ -1837,9 +1848,6 @@ public class PixelShaderUI extends JFrame {
 
 	private void layerExport(File file, ImageLayer layer) {
 		if (null != layer) {
-			if (null == propertiesProject) {
-				propertiesProject = new Properties();
-			}
 			File imageFile;
 			File propFile = null;
 			String imagePath;
@@ -1855,19 +1863,23 @@ public class PixelShaderUI extends JFrame {
 					file = imageFile;
 				}
 				if (null != file && null != prop) {
-					File temp;
-					if (file.isDirectory()) {
-						temp = file;
+					if (!isExportProject) {
+						File temp;
+						if (file.isDirectory()) {
+							temp = file;
+						} else {
+							temp = file.getParentFile();
+						}
+						file = new File(temp, imageFile.getName());
+						propFile = getFileLayer(file);
+						propertiesUtils.storePropertiesXml(prop, propFile, tag_suffixes_layer, commentLayer,
+								encoding_default);
 					} else {
-						temp = file.getParentFile();
-					}
-					file = new File(temp, imageFile.getName());
-					propFile = getFileLayer(file);
-					propertiesUtils.storePropertiesXml(prop, propFile, tag_suffixes_layer, commentLayer,
-							encoding_default);
-					if (isExportProject) {
 						obj = layer.getObject();
 						if (null != obj) {
+							if (null == propertiesProject) {
+								propertiesProject = new Properties();
+							}
 							propertiesProject.put(layer.getObject(), prop);
 						}
 					}
@@ -2279,16 +2291,16 @@ public class PixelShaderUI extends JFrame {
 			return;
 		}
 		File file = fileArray[0];
-		File dir = file.getParentFile();
-		if (null == dir) {
+		File dir;
+		if (file.isFile()) {
+			dir = file.getParentFile();
+		} else {
+			dir = file;
+		}
+		if (null == dir || !dir.exists()) {
 			return;
 		}
-		if (filterStyle == fileFilterStyle_Images) {
-			imagesExport(dir);
-		} else if (filterStyle == fileFilterStyle_Layers) {
-			isExportProject = false;
-			layerExport(file, layerListRoot);
-		} else if (filterStyle == fileFilterStyle_Preview) {
+		if (filterStyle == fileFilterStyle_Preview) {
 			Calendar calendar = new GregorianCalendar();
 			StringBuffer sbuf = new StringBuffer();
 			sbuf.append("layerCombined-");
@@ -2309,16 +2321,24 @@ public class PixelShaderUI extends JFrame {
 				imageExport(image, null, new File(dir, sbuf.toString()));
 			}
 		} else if (filterStyle == fileFilterStyle_Image) {
-			File temp = new File(imageLayerSelected.getImagePath());
-			imageExport(imageLayerSelected.getImage(), null, new File(dir, temp.getName()));
+			if (null != imageLayerSelected) {
+				String path = imageLayerSelected.getImagePath();
+				if (null != path) {
+					File temp = new File(path);
+					imageExport(imageLayerSelected.getImage(), null, new File(dir, temp.getName()));
+				}
+			}
+		} else if (filterStyle == fileFilterStyle_Images) {
+			imagesExport(dir);
 		} else if (filterStyle == fileFilterStyle_Layer) {
 			layerExport(file, imageLayerSelected);
+		} else if (filterStyle == fileFilterStyle_Layers) {
+			isExportProject = false;
+			layerExport(file, layerListRoot);
 		} else if (filterStyle == fileFilterStyle_Project) {
 			isExportProject = true;
-			imagesExport(dir);
 			layerExport(file, layerListRoot);
 		} else if (filterStyle == fileFilterStyle_PSD) {
-
 		}
 	}
 
