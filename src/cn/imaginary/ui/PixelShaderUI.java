@@ -1415,10 +1415,10 @@ public class PixelShaderUI extends JFrame {
 											public void mouseMoved(MouseEvent e) {
 												int selRow = jTreeRoot.getRowForLocation(e.getX(), e.getY());
 												rowMoved = selRow;
-												myTreeNodeMoveTo(selRow, isLayerAction);
+												nodeMoveTo(selRow, isLayerAction);
 											}
 
-											private void myTreeNodeMoveTo(int selRow, boolean todo) {
+											private void nodeMoveTo(int selRow, boolean todo) {
 												if (rowMoved == -1 || rowDragged == -1 || rowDragged == 0
 														|| rowMoved == rowDragged) {
 													return;
@@ -1446,12 +1446,12 @@ public class PixelShaderUI extends JFrame {
 												if (selRow != -1) {
 													if (e.getClickCount() == 1) {
 														if (e.getButton() == MouseEvent.BUTTON3) {
-															myRightClick(selRow);
+															rightClick(selRow);
 														} else {
-															mySingleClick(selRow);
+															singleClick(selRow);
 														}
 													} else if (e.getClickCount() == 2) {
-														myDoubleClick(selRow);
+														doubleClick(selRow);
 													}
 												}
 											}
@@ -1477,10 +1477,10 @@ public class PixelShaderUI extends JFrame {
 											public void mouseReleased(MouseEvent e) {
 											}
 
-											private void myDoubleClick(int selRow) {
+											private void doubleClick(int selRow) {
 											}
 
-											private void myRightClick(int selRow) {
+											private void rightClick(int selRow) {
 												if (selRow == -1) {
 													return;
 												}
@@ -1505,7 +1505,7 @@ public class PixelShaderUI extends JFrame {
 												}
 											}
 
-											private void mySingleClick(int selRow) {
+											private void singleClick(int selRow) {
 												if (selRow == -1) {
 													return;
 												}
@@ -2407,10 +2407,15 @@ public class PixelShaderUI extends JFrame {
 			modelRoot.removeNodeFromParent(treeNodeDragged);
 			modelRoot.insertNodeInto(treeNodeDragged, treeNodeParent, index);
 			modelRoot.nodeChanged(treeNodeParent);
+			Object objectSuper;
 			Object object = treeNodeDragged.getUserObject();
 			if (null != object) {
 				ImageLayer layer = fileUtils.getImageLayer(layerListRoot, object);
 				if (null != layer) {
+					objectSuper = treeNodeParent.getUserObject();
+					if (null != objectSuper) {
+						layer.setObjectSuper(objectSuper);
+					}
 					index = layerListRoot.indexOf(layer);
 					if (index != -1) {
 						layerListRoot.set(index, layer);
@@ -2451,6 +2456,10 @@ public class PixelShaderUI extends JFrame {
 			DefaultTreeModel modelRoot = (DefaultTreeModel) jTreeRoot.getModel();
 			updateTreeNode(modelRoot, layerListRoot);
 			if (isUpdate) {
+				System.out.print("ps2458_modelProperties:");
+				System.out.println(null == modelProperties);
+				System.out.print("modelRoot:");
+				System.out.println(null == modelRoot);
 				if (null != modelProperties) {
 					updateTreeNode(modelRoot, modelProperties);
 				}
@@ -2488,7 +2497,7 @@ public class PixelShaderUI extends JFrame {
 							for (Iterator<Object> iteratorKey = keySet.iterator(); iteratorKey.hasNext();) {
 								key = iteratorKey.next();
 								if (null != key && key instanceof String) {
-									key = objectUtils.getObject((String) key);
+									key = objectUtils.getObject(key.toString());
 									if (null != key && key instanceof LayerNode) {
 										treeSet.add((LayerNode) key);
 									}
@@ -2500,13 +2509,9 @@ public class PixelShaderUI extends JFrame {
 								if (null != key) {
 									key = key.toString();
 									value = propLayer.get(key);
-									if (key instanceof LayerNode) {
-										node = (LayerNode) key;
-										modelProperties.put(node.getID(), node);
-									}
 									if (null != value) {
 										if (value instanceof String) {
-											value = objectUtils.getProperties((String) value);
+											value = objectUtils.getProperties(value.toString());
 										}
 										if (value instanceof Properties) {
 											prop = (Properties) value;
@@ -2514,8 +2519,16 @@ public class PixelShaderUI extends JFrame {
 											if (null == file) {
 												imageLayer = new ImageLayer();
 												imageLayer.setProperties(prop);
-												name = imageLayer.getName() + tag_at + imageLayer.hashCode();
-												imageLayer.setObject(name);
+												key = objectUtils.getObject(key.toString());
+												if (null != key && key instanceof LayerNode) {
+													node = (LayerNode) key;
+													modelProperties.put(node.getID(), node);
+													imageLayer.setObjectSuper(node.getObjectSuper());
+													imageLayer.setObject(node.getObject());
+												} else {
+													name = imageLayer.getName() + tag_at + imageLayer.hashCode();
+													imageLayer.setObject(name);
+												}
 												layerList.add(imageLayer);
 											}
 										}
@@ -2664,7 +2677,8 @@ public class PixelShaderUI extends JFrame {
 	}
 
 	private void updateTreeNode(DefaultTreeModel modelRoot, Properties properties) {
-		treeModelUtils.loadNode(modelRoot, properties);
+		DefaultTreeModel model = treeModelUtils.loadNode(modelRoot, properties);
+		jTreeRoot.setModel(model);
 	}
 
 	private void warning() {
